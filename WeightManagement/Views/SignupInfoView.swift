@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct SignupInfo: View {
+struct SignupInfoView: View {
     var body: some View {
         
         ZStack {
@@ -21,12 +21,13 @@ struct SignupInfo: View {
                 HStack {
                     Text("We need some basic info to better\n support you in achieving your goals.")
                         .multilineTextAlignment(.center)
+                        .font(.headline)
                 }
                 
                 Spacer()
                 
                 //Got it, start! Button
-                NavigationLink(destination: SignupView()) {
+                NavigationLink(destination: YourBasicsView()) {
                     Text("Got it, start!")
                         .foregroundColor(.white)
                         .font(.title3)
@@ -61,5 +62,5 @@ struct SignupInfo: View {
 }
 
 #Preview {
-    SignupInfo()
+    SignupInfoView()
 }
