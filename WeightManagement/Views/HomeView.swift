@@ -15,25 +15,54 @@ struct HomeView: View {
         
         ZStack {
             
-            VStack {
-                Text("You are logged in!")
-                Button("Sign Out") {
-                    // Firebase'den oturumu kapat
-                    do {
-                        try Auth.auth().signOut()
-                        self.isPresentedWelcomeView = true
-                    } catch let signOutError as NSError {
-                        print("Error signing out: %@", signOutError)
-                        // Hata durumunda kullanıcıya bir hata mesajı gösterebilirsiniz
+            /*
+             Text("You are logged in!")
+             Button("Sign Out") {
+             // Firebase'den oturumu kapat
+             do {
+             try Auth.auth().signOut()
+             self.isPresentedWelcomeView = true
+             } catch let signOutError as NSError {
+             print("Error signing out: %@", signOutError)
+             // Hata durumunda kullanıcıya bir hata mesajı gösterebilirsiniz
+             }
+             }
+             .fullScreenCover(isPresented: $isPresentedWelcomeView) {
+             WelcomeView()
+             }*/
+            
+            TabView {
+                
+                DiaryView()
+                    .tabItem {
+                        Image(systemName: "chart.bar.doc.horizontal")
+                        Text("Diary")
                     }
-                }
-                .fullScreenCover(isPresented: $isPresentedWelcomeView) {
-                    WelcomeView()
-                }
+                SuggestionView()
+                    .tabItem {
+                        Image(systemName: "fork.knife.circle")
+                        Text("Suggestion")
+                    }
+                
+                ProfileView()
+                    .tabItem {
+                        Image(systemName: "person.circle")
+                        Text("Profile")
+                    }
+                
             }
+            .accentColor(.white)
+            .onAppear() {
+                UITabBar.appearance().backgroundColor = .lightGray
+            }
+            
+            
+            
+            
             .navigationBarBackButtonHidden(true)
             
         }
+        
         
     }
 }
