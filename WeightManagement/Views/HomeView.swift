@@ -15,22 +15,6 @@ struct HomeView: View {
         
         ZStack {
             
-            /*
-             Text("You are logged in!")
-             Button("Sign Out") {
-             // Firebase'den oturumu kapat
-             do {
-             try Auth.auth().signOut()
-             self.isPresentedWelcomeView = true
-             } catch let signOutError as NSError {
-             print("Error signing out: %@", signOutError)
-             // Hata durumunda kullanıcıya bir hata mesajı gösterebilirsiniz
-             }
-             }
-             .fullScreenCover(isPresented: $isPresentedWelcomeView) {
-             WelcomeView()
-             }*/
-            
             TabView {
                 
                 DiaryView()
@@ -51,18 +35,15 @@ struct HomeView: View {
                     }
                 
             }
-            .accentColor(.white)
+            .accentColor(.orange)
             .onAppear() {
-                UITabBar.appearance().backgroundColor = .lightGray
+                UITabBar.appearance().backgroundColor = .darkGray
+                UITabBar.appearance().unselectedItemTintColor = .white
             }
-            
-            
-            
             
             .navigationBarBackButtonHidden(true)
             
         }
-        
         
     }
 }

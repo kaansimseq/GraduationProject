@@ -15,11 +15,11 @@ struct ProfileView: View {
     @State private var photosPickerItem: PhotosPickerItem?
     
     @ObservedObject private var viewModel = UserViewModel()
-    @State private var progress: CGFloat = 0.0 // Progress değeri (0.0 - 1.0 aralığında)
+    @State private var progress: CGFloat = 0.0
     @State private var showingLogoutConfirmation = false
     
     init() {
-        //Kullanıcı oturum açtığında UID'yi al.
+        // Get the UID when the user logs in.
         if let currentUser = Auth.auth().currentUser {
             let userUID = currentUser.uid
             viewModel.fetchDataUsers(forUID: userUID)
@@ -28,17 +28,16 @@ struct ProfileView: View {
         }
     }
     
+    // Logout Function
     func logout() {
         do {
-            try Auth.auth().signOut() // Firebase Authentication'tan çıkış yap
-            // Eğer çıkış başarılı olduysa, WelcomeView sayfasına git
-            // AppDelegate üzerinden Window değişkenine erişerek sayfayı değiştirebiliriz
+            try Auth.auth().signOut() // Logout of Firebase Authentication
+            // If the exit was successful, go to the WelcomeView page
             if let window = UIApplication.shared.windows.first {
                 window.rootViewController = UIHostingController(rootView: WelcomeView())
                 window.makeKeyAndVisible()
             }
         } catch {
-            // Hata durumunda burada işlem yapabiliriz, örneğin bir hata mesajı gösterebiliriz
             print("Logout error: \(error.localizedDescription)")
         }
     }
@@ -49,6 +48,8 @@ struct ProfileView: View {
             Color.white.edgesIgnoringSafeArea(.all)
             
             VStack {
+                
+                // Profile Image
                 HStack(spacing: 20) {
                     PhotosPicker(selection: $photosPickerItem, matching: .images) {
                         Image(uiImage: avatarImage ?? UIImage(named: "defaultAvatar")!)
@@ -59,7 +60,7 @@ struct ProfileView: View {
                     }
                     
                     VStack(alignment: .leading) {
-                        Text("viewModel.name")
+                        Text(viewModel.name)
                             .font(.largeTitle.bold())
                     }
                     
@@ -67,17 +68,19 @@ struct ProfileView: View {
                     
                 }
                 
-                //Spacer()
+                Spacer()
                 
-                // Gri kutu
+                // Inside the Box
                 VStack {
                     RoundedRectangle(cornerRadius: 20)
                         .foregroundColor(Color.gray.opacity(0.3))
-                        .frame(height: 250) // Yüksekliği artırıldı
+                        .frame(height: 250) // Box height
                         .overlay(
-                            VStack(spacing: 20) { // Vertical Stack içindeki spacing artırıldı
+                            VStack(spacing: 20) {
+                                // Your Goal - Weight
                                 HStack() {
                                     Spacer()
+                                    // Your Goal
                                     VStack(alignment: .center, spacing: 8) {
                                         Text("Your Goal")
                                             .font(.title3)
@@ -89,6 +92,7 @@ struct ProfileView: View {
                                     Spacer()
                                     Divider()
                                     Spacer()
+                                    // Weight
                                     VStack(alignment: .center, spacing: 8) {
                                         Text("Weight")
                                             .font(.title3)
@@ -103,6 +107,7 @@ struct ProfileView: View {
                                 //Start - Goal
                                 VStack {
                                     HStack {
+                                        // Start
                                         VStack(alignment: .leading) {
                                             Text("Start")
                                                 .font(.footnote)
@@ -112,6 +117,7 @@ struct ProfileView: View {
                                                 .foregroundColor(.gray)
                                         }
                                         Spacer()
+                                        // Goal
                                         VStack(alignment: .trailing) {
                                             Text("Goal")
                                                 .font(.footnote)
@@ -121,7 +127,7 @@ struct ProfileView: View {
                                                 .foregroundColor(.gray)
                                         }
                                     }
-                                    //Bar
+                                    // Progress Bar
                                     GeometryReader { geometry in
                                         ZStack(alignment: .leading) {
                                             RoundedRectangle(cornerRadius: 10)
@@ -130,56 +136,101 @@ struct ProfileView: View {
                                             RoundedRectangle(cornerRadius: 10)
                                                 .foregroundColor(.blue)
                                                 .frame(width: max(min(progress * geometry.size.width, geometry.size.width), 0), height: 20)
-                                                .animation(.linear(duration: 0.5)) // Animasyon eklendi
+                                                .animation(.linear(duration: 0.5))
                                         }
                                     }
                                     .frame(height: 20)
                                 }
                                 .padding(.horizontal)
                                 
-                                HStack {
-                                    // - Button
-                                    Button(action: {
-                                        if viewModel.weight > viewModel.startWeight { // Minimum ağırlık sınırlaması
-                                            viewModel.weight -= 0.1
-                                            if viewModel.weight <= viewModel.startWeight {
-                                                // Eğer ağırlık başlangıç değerine eşit veya başlangıç değerinden düşükse, azaltmayı durdur
-                                                viewModel.weight = viewModel.startWeight
+                                // Progress bar working status
+                                if viewModel.GLWeight == "Gain Weight" {
+                                    HStack {
+                                        // - Button
+                                        Button(action: {
+                                            if viewModel.weight > viewModel.startWeight { // Minimum weight limitation
+                                                viewModel.weight -= 0.1
+                                                if viewModel.weight <= viewModel.startWeight {
+                                                    // Stop reduction if weight is less than or equal to the initial value
+                                                    viewModel.weight = viewModel.startWeight
+                                                }
+                                                let targetProgress = CGFloat(viewModel.weight / viewModel.goalWeight)
+                                                withAnimation(Animation.linear(duration: 0.1)) { // 0.1 second animation to fill slowly
+                                                    progress = min(progress - 0.01, targetProgress) // Slowly lower the bar towards the target
+                                                }
                                             }
-                                            let targetProgress = CGFloat(viewModel.weight / viewModel.goalWeight)
-                                            withAnimation(Animation.linear(duration: 0.1)) { // 0.1 saniyede yavaş yavaş dolması için animasyon
-                                                progress = min(progress - 0.01, targetProgress) // Barı hedefe doğru yavaşça azalt
-                                            }
+                                        }) {
+                                            Image(systemName: "minus.circle.fill")
                                         }
-                                    }) {
-                                        Image(systemName: "minus.circle.fill")
-                                    }
-                                    .font(.title)
-                                    .foregroundColor(viewModel.weight > viewModel.startWeight ? .red : .gray)
-                                    .disabled(viewModel.weight <= viewModel.startWeight) // Eğer ağırlık başlangıç değerine ulaştıysa - butonu devre dışı bırakılır
-                                    
-                                    // + Button
-                                    Button(action: {
-                                        if viewModel.weight < viewModel.goalWeight { // Maksimum ağırlık sınırlaması
-                                            viewModel.weight += 0.1
-                                            if viewModel.weight >= viewModel.goalWeight {
-                                                // Eğer ağırlık hedefe eşit veya hedefin üzerinde ise, artışı durdur
-                                                viewModel.weight = viewModel.goalWeight
+                                        .font(.title)
+                                        .foregroundColor(viewModel.weight > viewModel.startWeight ? .red : .gray)
+                                        .disabled(viewModel.weight <= viewModel.startWeight) // If the weight has reached the initial value, the - button is deactivated
+                                        
+                                        // + Button
+                                        Button(action: {
+                                            if viewModel.weight < viewModel.goalWeight { // Maximum weight limitation
+                                                viewModel.weight += 0.1
+                                                if viewModel.weight >= viewModel.goalWeight {
+                                                    // If the weight is equal to or above the target, stop the increment
+                                                    viewModel.weight = viewModel.goalWeight
+                                                }
+                                                let targetProgress = CGFloat(viewModel.weight / viewModel.goalWeight)
+                                                withAnimation(Animation.linear(duration: 0.1)) {
+                                                    progress = min(progress + 0.01, targetProgress)
+                                                }
                                             }
-                                            let targetProgress = CGFloat(viewModel.weight / viewModel.goalWeight)
-                                            withAnimation(Animation.linear(duration: 0.1)) { // 0.1 saniyede yavaş yavaş dolması için animasyon
-                                                progress = min(progress + 0.01, targetProgress) // Barı hedefe doğru yavaşça artır
-                                            }
+                                        }) {
+                                            Image(systemName: "plus.circle.fill")
                                         }
-                                    }) {
-                                        Image(systemName: "plus.circle.fill")
+                                        .font(.title)
+                                        .foregroundColor(viewModel.weight < viewModel.goalWeight ? .green : .gray)
+                                        .disabled(viewModel.weight >= viewModel.goalWeight) // If the weight has reached the target, the + button is deactivated
                                     }
-                                    .font(.title)
-                                    .foregroundColor(viewModel.weight < viewModel.goalWeight ? .green : .gray)
-                                    .disabled(viewModel.weight >= viewModel.goalWeight) // Eğer ağırlık hedefe ulaştıysa + butonu devre dışı bırakılır
                                 }
+                                else if viewModel.GLWeight == "Lose Weight" {
+                                    HStack {
+                                        // + Button
+                                        Button(action: {
+                                            if viewModel.weight < viewModel.startWeight {
+                                                viewModel.weight += 0.1
+                                                if viewModel.weight >= viewModel.startWeight {
+                                                    viewModel.weight = viewModel.startWeight
+                                                }
+                                                let targetProgress = CGFloat(viewModel.weight / viewModel.goalWeight)
+                                                withAnimation(Animation.linear(duration: 0.1)) {
+                                                    progress = min(progress - 0.01, targetProgress)
+                                                }
+                                            }
+                                        }) {
+                                            Image(systemName: "plus.circle.fill")
+                                        }
+                                        .font(.title)
+                                        .foregroundColor(viewModel.weight < viewModel.startWeight ? .red : .gray)
+                                        .disabled(viewModel.weight >= viewModel.startWeight)
+                                        
+                                        // - Button
+                                        Button(action: {
+                                            if viewModel.weight > viewModel.goalWeight {
+                                                viewModel.weight -= 0.1
+                                                if viewModel.weight <= viewModel.goalWeight {
+                                                    viewModel.weight = viewModel.goalWeight
+                                                }
+                                                let targetProgress = CGFloat(viewModel.weight / viewModel.goalWeight)
+                                                withAnimation(Animation.linear(duration: 0.1)) {
+                                                    progress = min(progress + 0.01, targetProgress)
+                                                }
+                                            }
+                                        }) {
+                                            Image(systemName: "minus.circle.fill")
+                                        }
+                                        .font(.title)
+                                        .foregroundColor(viewModel.weight > viewModel.goalWeight ? .green : .gray)
+                                        .disabled(viewModel.weight <= viewModel.goalWeight)
+                                    }
+                                }
+                                
                             }
-                                .padding(.vertical, 20) // Vertical padding eklendi
+                                .padding(.vertical, 20)
                         )
                 }
                 .padding()
@@ -234,7 +285,6 @@ struct ProfileView: View {
                 // Logout Button
                 Button(action: {
                     
-                    // Logout onayı iste
                     showingLogoutConfirmation = true
                     
                 }) {
@@ -250,9 +300,9 @@ struct ProfileView: View {
                         title: Text("Logout?"),
                         message: Text("Are you sure you want to logout your account?"),
                         primaryButton: .default(Text("Logout")) {
-                            logout() // Logout basılırsa logout işlemini gerçekleştir
+                            logout() // Perform the logout process
                         },
-                        secondaryButton: .cancel(Text("Cancel")) // Cancel basılırsa hiçbir işlem yapma
+                        secondaryButton: .cancel(Text("Cancel")) // No action if Cancel is pressed
                     )
                 }
                 
