@@ -6,11 +6,12 @@
 //
 
 import SwiftUI
+import CommonCrypto
 
 struct AddFoodView: View {
     @Environment(\.presentationMode) var presentationMode
     
-    @State private var searchText: String = ""
+    @ObservedObject var viewModel = ViewModel()
     
     var body: some View {
         
@@ -41,20 +42,72 @@ struct AddFoodView: View {
                 .padding(.top, 15)
                 
                 HStack {
-                    // Search Icon
-                    Image(systemName: "magnifyingglass")
-                        .foregroundColor(.gray)
-                        .padding(.leading)
+                    HStack {
+                        // Search Icon
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(.gray)
+                            .padding(.leading)
+                        
+                        // Search Textfield
+                        TextField("Search", text: $viewModel.searchText)
+                            .padding(.vertical, 10)
+                    }
+                    .background(Color.gray.opacity(0.3))
+                    .cornerRadius(10)
                     
-                    // Search Textfield
-                    TextField("Search", text: $searchText)
-                        .padding(.vertical, 10)
+                    
+                    Button(action: {
+                        
+                        viewModel.fetchSearchResults()
+                        
+                    }) {
+                        // Search Icon
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(.blue)
+                            .bold()
+                            .padding(.horizontal)
+                    }
                 }
-                .background(Color.gray.opacity(0.3))
-                .cornerRadius(10)
                 .padding(.horizontal)
                 
                 Spacer()
+                
+                ScrollView {
+                    ForEach(viewModel.foodItems, id: \.self) { food in
+                        VStack(alignment: .leading) {
+                            HStack {
+                                VStack(alignment: .leading) {
+                                    Text(food.foodName)
+                                        .font(.headline)
+                                    
+                                    HStack {
+                                        Image(systemName: "fork.knife")
+                                        Text(food.servingDescription ?? "")
+                                        Image(systemName: "flame.fill")
+                                        Text("Calories: \(food.caloriesInfo ?? "")kcal")
+                                        Spacer()
+                                        NavigationLink(destination: AddFoodDetailsView(selectedFood: food)) {
+                                            Image(systemName: "arrow.right.circle")
+                                                .resizable()
+                                                .scaledToFit()
+                                                .frame(width: 20, height: 20)
+                                                .foregroundColor(.blue)
+                                                .bold()
+                                        }
+                                    }
+                                    .font(.subheadline)
+                                    
+                                }
+                                Spacer()
+                            }
+                            .padding()
+                            .background(Color.gray.opacity(0.2))
+                            .cornerRadius(10)
+                        }
+                        .padding(.horizontal)
+                    }
+                }
+                
                 
             }
             

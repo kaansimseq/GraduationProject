@@ -17,6 +17,7 @@ struct WeightManagementApp: App {
         FirebaseApp.configure()
     }
     
+    
     var body: some Scene {
         WindowGroup {
             WelcomeView()
