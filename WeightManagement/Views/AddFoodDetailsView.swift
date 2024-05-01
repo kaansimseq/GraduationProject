@@ -6,13 +6,102 @@
 //
 
 import SwiftUI
+import Firebase
 
 struct AddFoodDetailsView: View {
     @Environment(\.presentationMode) var presentationMode
     
     @ObservedObject var viewModel = ViewModel()
     @State private var amount: String = ""
+    
     var selectedFood: ViewModel.Food // Seçilen yiyecek
+    
+    func saveFoodToDatabase() {
+        guard let currentUser = Auth.auth().currentUser else {
+            // Kullanıcı oturum açmamışsa işlemi durdur
+            return
+        }
+        
+        let db = Firestore.firestore()
+        let userRef = db.collection("users").document(currentUser.uid)
+        let foodsRef = userRef.collection("foods")
+        
+        // Seçilen yiyecek verilerini Firestore'a kaydet
+        foodsRef.addDocument(data: [
+            "foodName": selectedFood.foodName,
+            "amount": amount,
+            "calories": calculateCalories() ?? "",
+            "carbs": calculateCarbs() ?? "",
+            "protein": calculateProtein() ?? "",
+            "fat": calculateFat() ?? ""
+        ]) { err in
+            if let err = err {
+                print("Error adding document: \(err)")
+            } else {
+                print("Document added")
+                // Ekleme işlemi başarılı olduğunda, sayfayı kapat
+                self.presentationMode.wrappedValue.dismiss()
+                
+                
+            }
+        }
+    }
+    
+    func calculateCalories() -> String? {
+        if let gramValue = Double(selectedFood.servingSizeNumeric ?? ""), let calorieValue = Double(selectedFood.caloriesInfo ?? ""), let enteredAmount = Double(amount) {
+            // Seçilen yiyeceğin 1 gramında kaç kalori olduğunu hesaplayın
+            let caloriePerGram = calorieValue / gramValue
+            
+            // Girilen miktara göre kaloriyi hesaplayın
+            let totalCalories = caloriePerGram * enteredAmount
+            
+            // Sonucu string olarak dön
+            return String(format: "%.2f", totalCalories)
+        }
+        return nil
+    }
+    
+    func calculateProtein() -> String? {
+        if let gramValue = Double(selectedFood.servingSizeNumeric ?? ""), let proteinValue = Double(selectedFood.proteinInfo ?? ""), let enteredAmount = Double(amount) {
+            // Seçilen yiyeceğin 1 gramında kaç protein olduğunu hesaplayın
+            let proteinPerGram = proteinValue / gramValue
+            
+            // Girilen miktara göre proteini hesaplayın
+            let totalProtein = proteinPerGram * enteredAmount
+            
+            // Sonucu string olarak dön
+            return String(format: "%.2f", totalProtein)
+        }
+        return nil
+    }
+    
+    func calculateFat() -> String? {
+        if let gramValue = Double(selectedFood.servingSizeNumeric ?? ""), let fatValue = Double(selectedFood.fatInfo ?? ""), let enteredAmount = Double(amount) {
+            // Seçilen yiyeceğin 1 gramında kaç yağ olduğunu hesaplayın
+            let fatPerGram = fatValue / gramValue
+            
+            // Girilen miktara göre yağı hesaplayın
+            let totalFat = fatPerGram * enteredAmount
+            
+            // Sonucu string olarak dön
+            return String(format: "%.2f", totalFat)
+        }
+        return nil
+    }
+    
+    func calculateCarbs() -> String? {
+        if let gramValue = Double(selectedFood.servingSizeNumeric ?? ""), let carbsValue = Double(selectedFood.carbsInfo ?? ""), let enteredAmount = Double(amount) {
+            // Seçilen yiyeceğin 1 gramında kaç karbonhidrat olduğunu hesaplayın
+            let carbsPerGram = carbsValue / gramValue
+            
+            // Girilen miktara göre karbonhidratı hesaplayın
+            let totalCarbs = carbsPerGram * enteredAmount
+            
+            // Sonucu string olarak dön
+            return String(format: "%.2f", totalCarbs)
+        }
+        return nil
+    }
     
     var body: some View {
         
@@ -26,7 +115,7 @@ struct AddFoodDetailsView: View {
                         .font(.title)
                         .bold()
                         .padding(.leading, 30)
-                        //.padding(.top, 30)
+                    //.padding(.top, 30)
                     Spacer()
                 }
                 
@@ -34,7 +123,13 @@ struct AddFoodDetailsView: View {
                 HStack {
                     Image(systemName: "g.square")
                     TextField("Amount", text: $amount)
-                        .keyboardType(.numberPad)
+                        .keyboardType(.decimalPad)
+                        .onChange(of: amount) { newValue in
+                            //Convert comma to dot.
+                            if newValue.contains(",") {
+                                amount = newValue.replacingOccurrences(of: ",", with: ".")
+                            }
+                        }
                     
                     Spacer()
                     
@@ -60,7 +155,7 @@ struct AddFoodDetailsView: View {
                     
                     //Divider()
                     
-                    Text("\(selectedFood.caloriesInfo ?? "")kcal")
+                    Text("\(calculateCalories() ?? "") kcal")
                         .font(.subheadline)
                         .padding()
                 }
@@ -83,19 +178,19 @@ struct AddFoodDetailsView: View {
                             Image(systemName: "c.circle")
                             Text("Carbs")
                             Spacer()
-                            Text("\(selectedFood.carbsInfo ?? "") g")
+                            Text("\(calculateCarbs() ?? "") g")
                         }
                         HStack {
                             Image(systemName: "p.circle")
                             Text("Protein")
                             Spacer()
-                            Text("\(selectedFood.proteinInfo ?? "") g")
+                            Text("\(calculateProtein() ?? "") g")
                         }
                         HStack {
                             Image(systemName: "f.circle")
                             Text("Fat")
                             Spacer()
-                            Text("\(selectedFood.fatInfo ?? "") g")
+                            Text("\(calculateFat() ?? "") g")
                         }
                     }
                     .padding()
@@ -113,7 +208,7 @@ struct AddFoodDetailsView: View {
                 // Add Button
                 Button(action: {
                     
-                    
+                    saveFoodToDatabase()
                     
                 }) {
                     Text("Add")

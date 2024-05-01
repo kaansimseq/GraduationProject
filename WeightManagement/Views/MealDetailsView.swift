@@ -6,11 +6,23 @@
 //
 
 import SwiftUI
+import FirebaseAuth
 
 struct MealDetailsView: View {
     @Environment(\.presentationMode) var presentationMode
     
-    let mealTitle: String
+    @ObservedObject private var viewModel = UserViewModel()
+    
+    //let mealTitle: String
+    
+    init() {
+        // Get the UID when the user logs in.
+        if let currentUser = Auth.auth().currentUser {
+            let userUID = currentUser.uid
+            viewModel.fetchDataFoods(forUID: userUID)
+            viewModel.listenForDataChanges()
+        }
+    }
     
     var body: some View {
         
@@ -20,7 +32,7 @@ struct MealDetailsView: View {
             VStack {
                 // Title
                 HStack {
-                    Text(mealTitle)
+                    Text("mealTitle")
                         .font(.title)
                         .bold()
                     
@@ -66,20 +78,38 @@ struct MealDetailsView: View {
                 Spacer()
                 
                 ScrollView {
-                    VStack {
-                        HStack {
-                            Text("Food 1")
-                                .padding(.horizontal)
-                                .padding(.top, 10)
-                            Spacer()
+                    ForEach(viewModel.foods, id: \.foodName) { food in
+                        VStack(alignment: .leading) {
+                            HStack {
+                                VStack(alignment: .leading) {
+                                    Text(food.foodName)
+                                        .font(.headline)
+                                    
+                                    HStack {
+                                        Image(systemName: "fork.knife")
+                                        Text("\(food.amount) gr")
+                                        Image(systemName: "flame.fill")
+                                        Text("\(food.calories) kcal")
+                                        Spacer()
+                                        NavigationLink(destination: FoodDetailsView(detailsFood: food)) {
+                                            Image(systemName: "arrow.right.circle")
+                                                .resizable()
+                                                .scaledToFit()
+                                                .frame(width: 20, height: 20)
+                                                .foregroundColor(.blue)
+                                                .bold()
+                                        }
+                                    }
+                                    .font(.subheadline)
+                                    
+                                }
+                                Spacer()
+                            }
+                            .padding()
+                            .background(Color.gray.opacity(0.2))
+                            .cornerRadius(10)
                         }
-                        HStack {
-                            Text("Food 2")
-                                .padding(.horizontal)
-                                .padding(.top, 10)
-                            Spacer()
-                        }
-                        //Diğer Yemekler
+                        .padding(.horizontal)
                     }
                 }
                 
@@ -91,6 +121,7 @@ struct MealDetailsView: View {
                         .bold()
                 }
                 
+                
             }
             .padding()
             
@@ -101,5 +132,5 @@ struct MealDetailsView: View {
 }
 
 #Preview {
-    MealDetailsView(mealTitle: "")
+    MealDetailsView()
 }

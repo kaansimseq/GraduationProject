@@ -100,7 +100,7 @@ struct DiaryView: View {
                                         Spacer()
                                         Spacer()
                                         
-                                        NavigationLink(destination: MealDetailsView(mealTitle: selectedMeal)) {
+                                        NavigationLink(destination: MealDetailsView()) {
                                             Image(systemName: "arrow.right.circle")
                                                 .resizable()
                                                 .scaledToFit()
@@ -143,7 +143,7 @@ struct DiaryView: View {
                                         Spacer()
                                         Spacer()
                                         Spacer()
-                                        NavigationLink(destination: MealDetailsView(mealTitle: selectedMeal)) {
+                                        NavigationLink(destination: MealDetailsView()) {
                                             Image(systemName: "arrow.right.circle")
                                                 .resizable()
                                                 .scaledToFit()

@@ -11,6 +11,16 @@ import FirebaseAuth
 
 class UserViewModel: ObservableObject {
     
+    struct Food {
+        var foodID: String
+        var foodName: String
+        var amount: String
+        var calories: String
+        var carbs: String
+        var protein: String
+        var fat: String
+    }
+    
     //Users
     @Published var name: String = ""
     @Published var email: String = ""
@@ -27,6 +37,19 @@ class UserViewModel: ObservableObject {
     @Published var mealBased: [String] = [""]
     @Published var mealFree: String = ""
     @Published var week: Int = 0
+    //Foods
+    @Published var foods: [Food] = []
+    
+    private var uid: String = ""
+    
+    init() {
+        // Get the UID when the user logs in.
+        if let currentUser = Auth.auth().currentUser {
+            uid = currentUser.uid
+            fetchDataFoods(forUID: uid)
+            listenForDataChanges()
+        }
+    }
     
     private var db = Firestore.firestore()
     
@@ -103,6 +126,69 @@ class UserViewModel: ObservableObject {
                 self.week = data["Week"] as? Int ?? 0
             }
             
+        }
+    }
+    
+    //Fetch data from Foods
+    func fetchDataFoods(forUID uid: String) {
+        db.collection("users").document(uid).collection("foods").getDocuments { (querySnapshot, error) in
+            if let error = error {
+                print("Error fetching documents: \(error)")
+                return
+            }
+            
+            var foods: [Food] = [] // Yiyeceklerin listesi
+            
+            guard let documents = querySnapshot?.documents else {
+                print("No Documents")
+                return
+            }
+            
+            for document in documents {
+                let data = document.data()
+                
+                let food = Food(
+                    foodID: document.documentID,
+                    foodName: data["foodName"] as? String ?? "",
+                    amount: data["amount"] as? String ?? "",
+                    calories: data["calories"] as? String ?? "",
+                    carbs: data["carbs"] as? String ?? "",
+                    protein: data["protein"] as? String ?? "",
+                    fat: data["fat"] as? String ?? ""
+                )
+                foods.append(food) // Her bir yiyeceği listeye ekle
+            }
+            
+            DispatchQueue.main.async {
+                self.foods = foods
+            }
+        }
+    }
+    
+    func listenForDataChanges() {
+        db.collection("users").document(uid).collection("foods").addSnapshotListener { querySnapshot, error in
+            guard let snapshot = querySnapshot else {
+                print("Error fetching snapshots: \(error!)")
+                return
+            }
+            
+            snapshot.documentChanges.forEach { diff in
+                if diff.type == .added {
+                    print("New food: \(diff.document.data())")
+                    // Yeni bir yiyecek eklendiğinde, foods array'ini güncelleyin
+                    self.fetchDataFoods(forUID: self.uid)
+                }
+                if diff.type == .modified {
+                    print("Modified food: \(diff.document.data())")
+                    // Bir yiyecek değiştirildiğinde, foods array'ini güncelleyin
+                    self.fetchDataFoods(forUID: self.uid)
+                }
+                if diff.type == .removed {
+                    print("Removed food: \(diff.document.data())")
+                    // Bir yiyecek silindiğinde, foods array'ini güncelleyin
+                    self.fetchDataFoods(forUID: self.uid)
+                }
+            }
         }
     }
     

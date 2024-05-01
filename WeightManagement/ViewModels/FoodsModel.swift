@@ -51,6 +51,17 @@ class ViewModel: ObservableObject {
             return nil
         }
         
+        // Computed property to parse serving size as numeric value
+        var servingSizeNumeric: String? {
+            let components = foodDescription.components(separatedBy: " - ")
+            if let servingSizeString = components.first {
+                // "Per " ve "g" kısımlarını kaldırıp, sadece sayısal değeri alıyoruz
+                let numericValue = servingSizeString.replacingOccurrences(of: "Per ", with: "").replacingOccurrences(of: "g", with: "").trimmingCharacters(in: .whitespaces)
+                return numericValue
+            }
+            return nil
+        }
+        
         // Computed property to parse food description for calories value
         var caloriesInfo: String? {
             let components = foodDescription.components(separatedBy: " | ")
@@ -141,7 +152,7 @@ class ViewModel: ObservableObject {
         var request = URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: 10.0)
         
         let header = [
-            "Authorization": "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjQ4NDUzNUJFOUI2REY5QzM3M0VDNUNBRTRGMEJFNUE2QTk3REQ3QkMiLCJ0eXAiOiJhdCtqd3QiLCJ4NXQiOiJTRVUxdnB0dC1jTno3Rnl1VHd2bHBxbDkxN3cifQ.eyJuYmYiOjE3MTQzOTE5NDIsImV4cCI6MTcxNDQ3ODM0MiwiaXNzIjoiaHR0cHM6Ly9vYXV0aC5mYXRzZWNyZXQuY29tIiwiYXVkIjoiYmFzaWMiLCJjbGllbnRfaWQiOiJkMjhhOTgzZTMyYTQ0NWE3YTA0ZWM3MmJmZTAxN2JiNSIsInNjb3BlIjpbImJhc2ljIl19.WwEqSYvxeUKiHRQCmF-8nNqVWU0Fw7dznc9216A-ZfGpU6Fxqxg20ZzaDzA1dW8kjJPl9NvRXPrzyELrmyJ3OqNrcmXQHOhlJJyQFJw3hNKsCjsvU21gFbBqg4t7pDe9mTnS5tw4fYzwtbwo6JHVFHT4XTzoppm7M1jG8x37PxrnGPDNf11iNIxWpSDD6uj1iS5eMBGS9Ub73pzJz4EG5TCg14wfseE11Oo0480HJ06Hj9_dUJOEFq2iIHvAh3ZLIwKZbZ_82rH1y7D4nT1ypa8IacfpmSCMdLDFt74cLN5Wk03P2asspRRKTYhmpU6C6VrAXgFMkMG8-jaZNZAKZQ",
+            "Authorization": "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjQ4NDUzNUJFOUI2REY5QzM3M0VDNUNBRTRGMEJFNUE2QTk3REQ3QkMiLCJ0eXAiOiJhdCtqd3QiLCJ4NXQiOiJTRVUxdnB0dC1jTno3Rnl1VHd2bHBxbDkxN3cifQ.eyJuYmYiOjE3MTQ0ODM2NTksImV4cCI6MTcxNDU3MDA1OSwiaXNzIjoiaHR0cHM6Ly9vYXV0aC5mYXRzZWNyZXQuY29tIiwiYXVkIjoiYmFzaWMiLCJjbGllbnRfaWQiOiJkMjhhOTgzZTMyYTQ0NWE3YTA0ZWM3MmJmZTAxN2JiNSIsInNjb3BlIjpbImJhc2ljIl19.w1FybsqpRD9tFNbI03_zdn3UGUbyKoybNMBNcxsfNgjg7-jIpqFsJEKc2RejKSb371-Hj0g-gvt14uwQU5j2-Aqd-SvAhZklh3yzO4Eq9OLDYzIBf4VckbFrUKQ9uSo7WrDeMuYJvGkTeGwS5TCtygJqBZjnDTdGcaUmzP0_DcbGwhuP6SPCmnsY9kllNSOxmdHMWVgDwGeS1BWLQWva5HhdBYZpojaoW4Xz488VXv6BJHDFKhTtTo1r4Efeq9RkJUTHhahzZZbZUvJimMUgLuxfxw2KXxpq0NcM89wFLdxGtwdk8a1AkrSVap5nIyd45A89WXD3ph-Mr7Lxub4NcQ",
             "X-RapidAPI-Key": "e383cc1b7dmsh7e4874f7d9f9851p121bb4jsnec2469238335",
             "X-RapidAPI-Host": "fatsecret4.p.rapidapi.com"
         ]
