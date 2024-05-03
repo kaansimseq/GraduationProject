@@ -11,7 +11,7 @@ import FirebaseAuth
 struct DiaryView: View {
     
     @ObservedObject private var viewModel = UserViewModel()
-    @State private var birthdate = Date()
+    @State private var calendar = Date()
     
     init() {
         // Get the UID when the user logs in.
@@ -30,7 +30,7 @@ struct DiaryView: View {
             
             VStack {
                 
-                DatePicker("Hi \(viewModel.name) 👋", selection: $birthdate, in: ...Date(), displayedComponents: .date)
+                DatePicker("Hi \(viewModel.name) 👋", selection: $calendar, in: ...Date(), displayedComponents: .date)
                     .font(.title)
                     .bold()
                     .padding(.horizontal)
@@ -100,7 +100,7 @@ struct DiaryView: View {
                                         Spacer()
                                         Spacer()
                                         
-                                        NavigationLink(destination: MealDetailsView()) {
+                                        NavigationLink(destination: MealDetailsView(mealTitle: selectedMeal)) {
                                             Image(systemName: "arrow.right.circle")
                                                 .resizable()
                                                 .scaledToFit()
@@ -143,7 +143,7 @@ struct DiaryView: View {
                                         Spacer()
                                         Spacer()
                                         Spacer()
-                                        NavigationLink(destination: MealDetailsView()) {
+                                        NavigationLink(destination: MealDetailsView(mealTitle: selectedMeal)) {
                                             Image(systemName: "arrow.right.circle")
                                                 .resizable()
                                                 .scaledToFit()

@@ -13,16 +13,19 @@ struct MealDetailsView: View {
     
     @ObservedObject private var viewModel = UserViewModel()
     
-    //let mealTitle: String
+    let mealTitle: String
     
-    init() {
+    init(mealTitle: String) {
+        self.mealTitle = mealTitle
+        
         // Get the UID when the user logs in.
         if let currentUser = Auth.auth().currentUser {
             let userUID = currentUser.uid
-            viewModel.fetchDataFoods(forUID: userUID)
-            viewModel.listenForDataChanges()
+            viewModel.fetchDataFoods(forUID: userUID, mealTitle: mealTitle) // mealTitle'a göre filtreleme yapılıyor
+            viewModel.listenForDataChanges(mealTitle: mealTitle) // mealTitle'a göre dinleme yapılıyor
         }
     }
+    
     
     var body: some View {
         
@@ -32,7 +35,7 @@ struct MealDetailsView: View {
             VStack {
                 // Title
                 HStack {
-                    Text("mealTitle")
+                    Text(mealTitle)
                         .font(.title)
                         .bold()
                     
@@ -113,7 +116,7 @@ struct MealDetailsView: View {
                     }
                 }
                 
-                NavigationLink(destination: AddFoodView()) {
+                NavigationLink(destination: AddFoodView(mealTitle: mealTitle)) {
                     Image(systemName: "plus.circle.fill")
                         .foregroundColor(.blue)
                     Text("Add Food")
@@ -132,5 +135,5 @@ struct MealDetailsView: View {
 }
 
 #Preview {
-    MealDetailsView()
+    MealDetailsView(mealTitle: "")
 }

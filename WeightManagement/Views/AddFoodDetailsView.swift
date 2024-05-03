@@ -11,10 +11,18 @@ import Firebase
 struct AddFoodDetailsView: View {
     @Environment(\.presentationMode) var presentationMode
     
+    @ObservedObject var viewModell = UserViewModel()
     @ObservedObject var viewModel = ViewModel()
     @State private var amount: String = ""
     
     var selectedFood: ViewModel.Food // Seçilen yiyecek
+    
+    var mealTitle: String
+    
+    init(selectedFood: ViewModel.Food, mealTitle: String) {
+        self.selectedFood = selectedFood
+        self.mealTitle = mealTitle
+    }
     
     func saveFoodToDatabase() {
         guard let currentUser = Auth.auth().currentUser else {
@@ -25,9 +33,11 @@ struct AddFoodDetailsView: View {
         let db = Firestore.firestore()
         let userRef = db.collection("users").document(currentUser.uid)
         let foodsRef = userRef.collection("foods")
+        //let mealsRef = userRef.collection("meals").document(mealTitle).collection("foods") // Meal title'a göre meals altındaki collection'a erişim sağlanıyor
         
         // Seçilen yiyecek verilerini Firestore'a kaydet
         foodsRef.addDocument(data: [
+            "mealTitle": mealTitle,
             "foodName": selectedFood.foodName,
             "amount": amount,
             "calories": calculateCalories() ?? "",
@@ -240,5 +250,5 @@ struct AddFoodDetailsView: View {
 }
 
 #Preview {
-    AddFoodDetailsView(selectedFood: ViewModel.Food(foodDescription: "", foodID: "", foodName: "", foodURL: "", brandName: nil))
+    AddFoodDetailsView(selectedFood: ViewModel.Food(foodDescription: "", foodID: "", foodName: "", foodURL: "", brandName: nil), mealTitle: "")
 }

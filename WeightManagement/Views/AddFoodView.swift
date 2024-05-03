@@ -13,6 +13,12 @@ struct AddFoodView: View {
     
     @ObservedObject var viewModel = ViewModel()
     
+    @State private var mealTitle: String
+    
+    init(mealTitle: String) {
+        self._mealTitle = State(initialValue: mealTitle)
+    }
+    
     var body: some View {
         
         ZStack {
@@ -86,7 +92,7 @@ struct AddFoodView: View {
                                         Image(systemName: "flame.fill")
                                         Text("Calories: \(food.caloriesInfo ?? "")kcal")
                                         Spacer()
-                                        NavigationLink(destination: AddFoodDetailsView(selectedFood: food)) {
+                                        NavigationLink(destination: AddFoodDetailsView(selectedFood: food, mealTitle: mealTitle)) {
                                             Image(systemName: "arrow.right.circle")
                                                 .resizable()
                                                 .scaledToFit()
@@ -118,5 +124,5 @@ struct AddFoodView: View {
 }
 
 #Preview {
-    AddFoodView()
+    AddFoodView(mealTitle: "")
 }

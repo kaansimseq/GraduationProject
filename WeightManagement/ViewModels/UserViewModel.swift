@@ -39,6 +39,7 @@ class UserViewModel: ObservableObject {
     @Published var week: Int = 0
     //Foods
     @Published var foods: [Food] = []
+    @Published var mealTitle: String = ""
     
     private var uid: String = ""
     
@@ -46,8 +47,8 @@ class UserViewModel: ObservableObject {
         // Get the UID when the user logs in.
         if let currentUser = Auth.auth().currentUser {
             uid = currentUser.uid
-            fetchDataFoods(forUID: uid)
-            listenForDataChanges()
+            fetchDataFoods(forUID: uid, mealTitle: mealTitle)
+            listenForDataChanges(mealTitle: mealTitle)
         }
     }
     
@@ -129,9 +130,9 @@ class UserViewModel: ObservableObject {
         }
     }
     
-    //Fetch data from Foods
-    func fetchDataFoods(forUID uid: String) {
-        db.collection("users").document(uid).collection("foods").getDocuments { (querySnapshot, error) in
+    //Fetch data from Foods filtered by mealTitle
+    func fetchDataFoods(forUID uid: String, mealTitle: String) {
+        db.collection("users").document(uid).collection("foods").whereField("mealTitle", isEqualTo: mealTitle).getDocuments { (querySnapshot, error) in
             if let error = error {
                 print("Error fetching documents: \(error)")
                 return
@@ -146,6 +147,8 @@ class UserViewModel: ObservableObject {
             
             for document in documents {
                 let data = document.data()
+                
+                self.mealTitle = data["mealTitle"] as? String ?? ""
                 
                 let food = Food(
                     foodID: document.documentID,
@@ -165,8 +168,8 @@ class UserViewModel: ObservableObject {
         }
     }
     
-    func listenForDataChanges() {
-        db.collection("users").document(uid).collection("foods").addSnapshotListener { querySnapshot, error in
+    func listenForDataChanges(mealTitle: String) {
+        db.collection("users").document(uid).collection("foods").whereField("mealTitle", isEqualTo: mealTitle).addSnapshotListener { querySnapshot, error in
             guard let snapshot = querySnapshot else {
                 print("Error fetching snapshots: \(error!)")
                 return
@@ -176,17 +179,17 @@ class UserViewModel: ObservableObject {
                 if diff.type == .added {
                     print("New food: \(diff.document.data())")
                     // Yeni bir yiyecek eklendiğinde, foods array'ini güncelleyin
-                    self.fetchDataFoods(forUID: self.uid)
+                    self.fetchDataFoods(forUID: self.uid, mealTitle: mealTitle)
                 }
                 if diff.type == .modified {
                     print("Modified food: \(diff.document.data())")
                     // Bir yiyecek değiştirildiğinde, foods array'ini güncelleyin
-                    self.fetchDataFoods(forUID: self.uid)
+                    self.fetchDataFoods(forUID: self.uid, mealTitle: mealTitle)
                 }
                 if diff.type == .removed {
                     print("Removed food: \(diff.document.data())")
                     // Bir yiyecek silindiğinde, foods array'ini güncelleyin
-                    self.fetchDataFoods(forUID: self.uid)
+                    self.fetchDataFoods(forUID: self.uid, mealTitle: mealTitle)
                 }
             }
         }

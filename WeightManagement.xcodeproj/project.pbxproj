@@ -153,6 +153,7 @@
 				6B9A8B022BAF2621000E3D17 /* HomeView.swift */,
 				6B0D7EBB2BC417F40009230C /* DiaryView.swift */,
 				6B0D7ECF2BD7E5880009230C /* MealDetailsView.swift */,
+				6B0D7EDF2BE13DF90009230C /* FoodDetailsView.swift */,
 				6B0D7ED12BD7FEA00009230C /* AddFoodView.swift */,
 				6B0D7EDB2BDEB3020009230C /* AddFoodDetailsView.swift */,
 				6B0D7EBF2BC418C90009230C /* SuggestionView.swift */,
@@ -160,7 +161,6 @@
 				6B0D7EC62BD1557E0009230C /* PersonalInfoView.swift */,
 				6B0D7EC82BD155990009230C /* AccountInfoView.swift */,
 				6B0D7ECA2BD162B10009230C /* AboutView.swift */,
-				6B0D7EDF2BE13DF90009230C /* FoodDetailsView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
