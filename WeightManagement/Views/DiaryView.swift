@@ -13,6 +13,8 @@ struct DiaryView: View {
     @ObservedObject private var viewModel = UserViewModel()
     @State private var calendar = Date()
     
+    @State private var progressValue: Double = 0.0
+    
     init() {
         // Get the UID when the user logs in.
         if let currentUser = Auth.auth().currentUser {
@@ -21,6 +23,92 @@ struct DiaryView: View {
             viewModel.fetchDataProperties(forUID: userUID)
             viewModel.fetchDataGoals(forUID: userUID)
         }
+    }
+    
+    // Calculate Daily Calorie
+    func calculateDailyCalorie() -> Double? {
+        var dailyCalorie: Double?
+        
+        //Male
+        if viewModel.gender == "Male" {
+            let weightMale = viewModel.weight
+            let heightMale = Double(viewModel.height)
+            let ageMale = Double(viewModel.age)
+            
+            let maleBMR = (10 * weightMale) + (6.25 * heightMale) - (5 * ageMale) + 5
+            dailyCalorie = maleBMR * 1.375
+            
+            let weightDifference = viewModel.goalWeight - viewModel.weight
+            let totalCalorie = weightDifference * 7700
+            let weeklyTotalCalorie = totalCalorie / Double(viewModel.week)
+            let dailyTotalCalorie = weeklyTotalCalorie / 7
+            
+            dailyCalorie = (dailyCalorie ?? 0.0) + dailyTotalCalorie
+            
+            dailyCalorie = (dailyCalorie ?? 0.0) - viewModel.totalCalories
+        }
+        //Female
+        else {
+            let weightFemale = viewModel.weight
+            let heightFemale = Double(viewModel.height)
+            let ageFemale = Double(viewModel.age)
+            
+            let femaleBMR = (10 * weightFemale) + (6.25 * heightFemale) - (5 * ageFemale) - 161
+            dailyCalorie = femaleBMR * 1.375
+            
+            let weightDifference = viewModel.goalWeight - viewModel.weight
+            let totalCalorie = weightDifference * 7700
+            let weeklyTotalCalorie = totalCalorie / Double(viewModel.week)
+            let dailyTotalCalorie = weeklyTotalCalorie / 7
+            
+            dailyCalorie = (dailyCalorie ?? 0.0) + dailyTotalCalorie
+            
+            dailyCalorie = (dailyCalorie ?? 0.0) - viewModel.totalCalories
+        }
+        
+        return dailyCalorie
+    }
+    
+    // Calculate Dialy Min Calorie
+    func calculateDailyMinCalorie() -> Double? {
+        var dailyCalorie: Double?
+        
+        //Male
+        if viewModel.gender == "Male" {
+            let weightMale = viewModel.weight
+            let heightMale = Double(viewModel.height)
+            let ageMale = Double(viewModel.age)
+            
+            let maleBMR = (10 * weightMale) + (6.25 * heightMale) - (5 * ageMale) + 5
+            dailyCalorie = maleBMR * 1.375
+            
+            let weightDifference = viewModel.goalWeight - viewModel.weight
+            let totalCalorie = weightDifference * 7700
+            let weeklyTotalCalorie = totalCalorie / Double(viewModel.week)
+            let dailyTotalCalorie = weeklyTotalCalorie / 7
+            
+            dailyCalorie = (dailyCalorie ?? 0.0) + dailyTotalCalorie
+            
+        }
+        //Female
+        else {
+            let weightFemale = viewModel.weight
+            let heightFemale = Double(viewModel.height)
+            let ageFemale = Double(viewModel.age)
+            
+            let femaleBMR = (10 * weightFemale) + (6.25 * heightFemale) - (5 * ageFemale) - 161
+            dailyCalorie = femaleBMR * 1.375
+            
+            let weightDifference = viewModel.goalWeight - viewModel.weight
+            let totalCalorie = weightDifference * 7700
+            let weeklyTotalCalorie = totalCalorie / Double(viewModel.week)
+            let dailyTotalCalorie = weeklyTotalCalorie / 7
+            
+            dailyCalorie = (dailyCalorie ?? 0.0) + dailyTotalCalorie
+            
+        }
+        
+        return dailyCalorie
     }
     
     var body: some View {
@@ -38,39 +126,58 @@ struct DiaryView: View {
                 
                 //Spacer()
                 
-                // Circular Progress Bar
-                VStack {
-                    ZStack {
-                        Circle()
-                            .stroke(Color.gray.opacity(0.3), lineWidth: 10)
-                            .frame(width: 150, height: 150)
-                        
-                        Circle()
-                            .trim(from: 0.6, to: 1.0) // Değiştirilebilir: 0.0 (sıfır) ile 1.0 (bir) arasında bir değer
-                            .stroke(Color.blue, lineWidth: 10)
-                            .frame(width: 150, height: 150)
-                            .rotationEffect(.degrees(-90))
-                        
-                        VStack {
-                            Text("3000")
-                                .font(.title)
-                            Text("Calories left")
-                                .foregroundColor(.gray)
+                // Circular Bar
+                HStack {
+                    Spacer()
+                    VStack {
+                        Text("\(String(format: "%.0f", calculateDailyMinCalorie() ?? 0.0))")
+                            .font(.headline)
+                        Text("DailyMin")
+                            .font(.footnote)
+                            .italic()
+                    }
+                    Spacer()
+                    VStack {
+                        ZStack {
                             
-                            Button(action: {
-                                // Detail butonuna basıldığında yapılacak işlemler
-                            }) {
-                                Text("Detail")
-                                    .foregroundColor(.black)
-                                    .bold()
-                                    .italic()
+                            Circle()
+                                .stroke(calculateDailyCalorie() ?? 0.0 <= 0.0 ? Color.red : Color.green, lineWidth: 10)
+                                .frame(width: 150, height: 150)
+                            
+                            VStack {
+                                Text(String(format: "%.0f", abs(calculateDailyCalorie() ?? 0.0)))
+                                    .font(.title)
+                                    .onAppear {
+                                        viewModel.fetchTotalCaloriesFromFirebase()
+                                    }
+                                Text(calculateDailyCalorie() ?? 0.0 <= 0.0 ? "Calories over" : "Calories left")
+                                    .foregroundColor(.gray)
+                                
+                                NavigationLink(destination: DetailView()) {
+                                    Text("Detail")
+                                        .foregroundColor(.black)
+                                        .bold()
+                                        .italic()
+                                }
+                                .padding(.top, 5)
                             }
-                            .padding(.top, 5)
+                            
                         }
                         
+                        //Spacer()
                     }
-                    
-                    //Spacer()
+                    Spacer()
+                    VStack {
+                        Text("\(String(format: "%.0f", viewModel.totalCalories))")
+                            .font(.headline)
+                            .onAppear {
+                                viewModel.fetchTotalCaloriesFromFirebase()
+                            }
+                        Text("Eaten")
+                            .font(.footnote)
+                            .italic()
+                    }
+                    Spacer()
                 }
                 .padding(.top, 40)
                 .padding(.bottom, 40)
@@ -95,11 +202,13 @@ struct DiaryView: View {
                                             .foregroundColor(.blue)
                                             .bold()
                                         Spacer()
-                                        Text("98 kcal")
+                                        Text("\(String(viewModel.totalCalories)) kcal")
+                                            .onAppear {
+                                                viewModel.fetchTotalCaloriesFromFirebase()
+                                            }
                                         Spacer()
                                         Spacer()
                                         Spacer()
-                                        
                                         NavigationLink(destination: MealDetailsView(mealTitle: selectedMeal)) {
                                             Image(systemName: "arrow.right.circle")
                                                 .resizable()
@@ -122,7 +231,7 @@ struct DiaryView: View {
                         }
                         
                         ForEach(viewModel.mealBased, id: \.self) { meal in
-                            let selectedMeal = meal
+                            let totalCalories = viewModel.totalCaloriesForMealTitles[meal] ?? 0.0
                             VStack {
                                 VStack(alignment: .leading) {
                                     Text(meal)
@@ -139,11 +248,14 @@ struct DiaryView: View {
                                             .foregroundColor(.blue)
                                             .bold()
                                         Spacer()
-                                        Text("98 kcal")
+                                        Text("\(String(totalCalories)) kcal")
+                                            .onAppear {
+                                                viewModel.fetchTotalCaloriesForMealTitle(mealTitle: meal)
+                                            }
                                         Spacer()
                                         Spacer()
                                         Spacer()
-                                        NavigationLink(destination: MealDetailsView(mealTitle: selectedMeal)) {
+                                        NavigationLink(destination: MealDetailsView(mealTitle: meal)) {
                                             Image(systemName: "arrow.right.circle")
                                                 .resizable()
                                                 .scaledToFit()

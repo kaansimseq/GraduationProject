@@ -7,6 +7,7 @@
 
 import SwiftUI
 import FirebaseAuth
+import Firebase
 
 struct MealDetailsView: View {
     @Environment(\.presentationMode) var presentationMode
@@ -26,6 +27,35 @@ struct MealDetailsView: View {
         }
     }
     
+    func totalCalories() -> String {
+        var total = 0.0
+        
+        for food in viewModel.foods {
+            if let calories = Double(food.calories) {
+                total += calories
+            }
+        }
+        
+        let formattedTotal = String(format: "%.2f", total)
+        
+        return formattedTotal
+    }
+    
+    func totalNutritionalValues() -> (Double, Double, Double) {
+        var totalCarbs = 0.0
+        var totalProtein = 0.0
+        var totalFat = 0.0
+        
+        for food in viewModel.foods {
+            if let carbs = Double(food.carbs), let protein = Double(food.protein), let fat = Double(food.fat) {
+                totalCarbs += carbs
+                totalProtein += protein
+                totalFat += fat
+            }
+        }
+        
+        return (totalCarbs, totalProtein, totalFat)
+    }
     
     var body: some View {
         
@@ -63,11 +93,11 @@ struct MealDetailsView: View {
                         .foregroundColor(.blue)
                         .bold()
                     Spacer()
-                    Text("98kcal")
+                    Text("\(totalCalories()) kcal")
                     Spacer()
                     Spacer()
                     Spacer()
-                    NavigationLink(destination: WelcomeView()) {
+                    NavigationLink(destination: MealFoodsDetailsView(totalNutritionalValues: totalNutritionalValues(), mealTitle: mealTitle)) {
                         Text("Details")
                             .foregroundColor(.blue)
                             .bold()

@@ -40,6 +40,13 @@ class UserViewModel: ObservableObject {
     //Foods
     @Published var foods: [Food] = []
     @Published var mealTitle: String = ""
+    //Total
+    @Published var totalCalories: Double = 0.0
+    @Published var totalCaloriesForMealTitles: [String: Double] = [:]
+    @Published var totalCarbs: Double = 0.0
+    @Published var totalProtein: Double = 0.0
+    @Published var totalFat: Double = 0.0
+    
     
     private var uid: String = ""
     
@@ -191,6 +198,98 @@ class UserViewModel: ObservableObject {
                     // Bir yiyecek silindiğinde, foods array'ini güncelleyin
                     self.fetchDataFoods(forUID: self.uid, mealTitle: mealTitle)
                 }
+            }
+        }
+    }
+    
+    func fetchTotalCaloriesFromFirebase() {
+        db.collection("users").document(uid).collection("foods").getDocuments { (querySnapshot, error) in
+            if let error = error {
+                print("Error fetching documents: \(error)")
+                return
+            }
+            
+            var totalCalories = 0.0
+            
+            guard let documents = querySnapshot?.documents else {
+                print("No Documents")
+                return
+            }
+            
+            for document in documents {
+                let data = document.data()
+                if let calories = Double(data["calories"] as? String ?? "0.0") {
+                    totalCalories += calories
+                }
+            }
+            
+            self.totalCalories = totalCalories // totalCalories değerini güncelle
+            
+            print("Total calories: \(totalCalories)")
+            
+        }
+    }
+    
+    func fetchTotalCaloriesForMealTitle(mealTitle: String) {
+        db.collection("users").document(uid).collection("foods").whereField("mealTitle", isEqualTo: mealTitle).getDocuments { (querySnapshot, error) in
+            if let error = error {
+                print("Error fetching documents: \(error)")
+                return
+            }
+            
+            var totalCalories = 0.0
+            
+            guard let documents = querySnapshot?.documents else {
+                print("No Documents")
+                return
+            }
+            
+            for document in documents {
+                let data = document.data()
+                if let calories = Double(data["calories"] as? String ?? "0.0") {
+                    totalCalories += calories
+                }
+            }
+            
+            // Toplam kaloriyi ilgili öğün başlığına göre güncelle
+            self.totalCaloriesForMealTitles[mealTitle] = totalCalories
+        }
+    }
+    
+    func fetchTotalNutrientsFromFirebase() {
+        db.collection("users").document(uid).collection("foods").getDocuments { (querySnapshot, error) in
+            if let error = error {
+                print("Error fetching documents: \(error)")
+                return
+            }
+            
+            var carbsSum = 0.0
+            var proteinSum = 0.0
+            var fatSum = 0.0
+            
+            guard let documents = querySnapshot?.documents else {
+                print("No Documents")
+                return
+            }
+            
+            for document in documents {
+                let data = document.data()
+                if let carbsString = data["carbs"] as? String,
+                   let proteinString = data["protein"] as? String,
+                   let fatString = data["fat"] as? String,
+                   let carbs = Double(carbsString),
+                   let protein = Double(proteinString),
+                   let fat = Double(fatString) {
+                    carbsSum += carbs
+                    proteinSum += protein
+                    fatSum += fat
+                }
+            }
+            
+            DispatchQueue.main.async {
+                self.totalCarbs = carbsSum
+                self.totalProtein = proteinSum
+                self.totalFat = fatSum
             }
         }
     }
