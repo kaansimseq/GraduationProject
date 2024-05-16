@@ -8,6 +8,8 @@
 import SwiftUI
 import PhotosUI
 import FirebaseAuth
+import Firebase
+import FirebaseStorage
 
 struct ProfileView: View {
     
@@ -15,6 +17,7 @@ struct ProfileView: View {
     @State private var photosPickerItem: PhotosPickerItem?
     
     @ObservedObject private var viewModel = UserViewModel()
+    
     @State private var progress: CGFloat = 0.0
     @State private var showingLogoutConfirmation = false
     
@@ -25,6 +28,57 @@ struct ProfileView: View {
             viewModel.fetchDataUsers(forUID: userUID)
             viewModel.fetchDataProperties(forUID: userUID)
             viewModel.fetchDataGoals(forUID: userUID)
+        }
+    }
+    
+    // Upload Profile Photo to Firebase Storage Function
+    func uploadImageToFirebaseStorage(_ image: UIImage) {
+        let storage = Storage.storage()
+        
+        guard let currentUser = Auth.auth().currentUser else { return }
+        let userUID = currentUser.uid
+        
+        // Convert photo data
+        guard let imageData = image.jpegData(compressionQuality: 0.5) else { return }
+        
+        // Get Firebase Storage reference
+        let storageRef = storage.reference()
+        
+        // Create file path to upload user's photo
+        let imageRef = storageRef.child("profileImages/\(userUID)/avatar.jpg")
+        
+        // Upload photo to the specified path
+        imageRef.putData(imageData, metadata: nil) { metadata, error in
+            if let error = error {
+                print("Error uploading image to Firebase Storage: \(error.localizedDescription)")
+            } else {
+                print("Image uploaded successfully")
+            }
+        }
+    }
+    
+    // Fetch Profile Photo from Firebase Storage Function
+    func fetchProfileImageFromStorage(userUID: String) {
+        let storageRef = Storage.storage().reference()
+        let imageRef = storageRef.child("profileImages/\(userUID)/avatar.jpg")
+        
+        imageRef.downloadURL { (url, error) in
+            if let error = error {
+                print("Error downloading profile image: \(error.localizedDescription)")
+            } else if let url = url {
+                // We got the URL, let's upload the image using this URL
+                URLSession.shared.dataTask(with: url) { (data, response, error) in
+                    if let error = error {
+                        print("Error downloading profile image data: \(error.localizedDescription)")
+                    } else if let data = data {
+                        DispatchQueue.main.async {
+                            if let profileImage = UIImage(data: data) {
+                                self.avatarImage = profileImage
+                            }
+                        }
+                    }
+                }.resume()
+            }
         }
     }
     
@@ -49,7 +103,7 @@ struct ProfileView: View {
             
             VStack {
                 
-                // Profile Image
+                // Profile Photo
                 HStack(spacing: 20) {
                     PhotosPicker(selection: $photosPickerItem, matching: .images) {
                         Image(uiImage: avatarImage ?? UIImage(named: "defaultAvatar")!)
@@ -58,7 +112,14 @@ struct ProfileView: View {
                             .frame(width: 110, height: 110)
                             .clipShape(.circle)
                     }
+                    .onAppear() {
+                        if let currentUser = Auth.auth().currentUser {
+                            let userUID = currentUser.uid
+                            fetchProfileImageFromStorage(userUID: userUID)
+                        }
+                    }
                     
+                    // Profile Name
                     VStack(alignment: .leading) {
                         Text(viewModel.name)
                             .font(.largeTitle.bold())
@@ -74,12 +135,15 @@ struct ProfileView: View {
                 VStack {
                     RoundedRectangle(cornerRadius: 20)
                         .foregroundColor(Color.gray.opacity(0.3))
-                        .frame(height: 250) // Box height
+                        .frame(height: 250)
                         .overlay(
                             VStack(spacing: 20) {
+                                
                                 // Your Goal - Weight
                                 HStack() {
+                                    
                                     Spacer()
+                                    
                                     // Your Goal
                                     VStack(alignment: .center, spacing: 8) {
                                         Text("Your Goal")
@@ -88,10 +152,10 @@ struct ProfileView: View {
                                         Text(viewModel.GLWeight)
                                             .font(.subheadline)
                                     }
-                                    //.padding(.leading)
                                     Spacer()
                                     Divider()
                                     Spacer()
+                                    
                                     // Weight
                                     VStack(alignment: .center, spacing: 8) {
                                         Text("Weight")
@@ -100,13 +164,15 @@ struct ProfileView: View {
                                         Text("\(viewModel.weight, specifier: "%.1f") kg")
                                             .font(.subheadline)
                                     }
-                                    //.padding(.trailing)
                                     Spacer()
                                 }
+                                
                                 Divider()
+                                
                                 //Start - Goal
                                 VStack {
                                     HStack {
+                                        
                                         // Start
                                         VStack(alignment: .leading) {
                                             Text("Start")
@@ -116,7 +182,9 @@ struct ProfileView: View {
                                                 .font(.footnote)
                                                 .foregroundColor(.gray)
                                         }
+                                        
                                         Spacer()
+                                        
                                         // Goal
                                         VStack(alignment: .trailing) {
                                             Text("Goal")
@@ -127,6 +195,7 @@ struct ProfileView: View {
                                                 .foregroundColor(.gray)
                                         }
                                     }
+                                    
                                     // Progress Bar
                                     GeometryReader { geometry in
                                         ZStack(alignment: .leading) {
@@ -300,9 +369,9 @@ struct ProfileView: View {
                         title: Text("Logout?"),
                         message: Text("Are you sure you want to logout your account?"),
                         primaryButton: .default(Text("Logout")) {
-                            logout() // Perform the logout process
+                            logout()
                         },
-                        secondaryButton: .cancel(Text("Cancel")) // No action if Cancel is pressed
+                        secondaryButton: .cancel(Text("Cancel"))
                     )
                 }
                 
@@ -316,6 +385,8 @@ struct ProfileView: View {
                        let data = try? await photosPickerItem.loadTransferable(type: Data.self) {
                         if let image = UIImage(data: data) {
                             avatarImage = image
+                            // Save the selected photo to Firestore
+                            uploadImageToFirebaseStorage(image)
                         }
                     }
                     photosPickerItem = nil

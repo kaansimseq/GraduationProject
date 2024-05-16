@@ -13,8 +13,6 @@ struct DiaryView: View {
     @ObservedObject private var viewModel = UserViewModel()
     @State private var calendar = Date()
     
-    @State private var progressValue: Double = 0.0
-    
     init() {
         // Get the UID when the user logs in.
         if let currentUser = Auth.auth().currentUser {
@@ -118,17 +116,16 @@ struct DiaryView: View {
             
             VStack {
                 
+                // Date Picker
                 DatePicker("Hi \(viewModel.name) 👋", selection: $calendar, in: ...Date(), displayedComponents: .date)
                     .font(.title)
                     .bold()
                     .padding(.horizontal)
                     .padding(.top, 30)
                 
-                //Spacer()
-                
-                // Circular Bar
                 HStack {
                     Spacer()
+                    // Daily Min Calorie Text
                     VStack {
                         Text("\(String(format: "%.0f", calculateDailyMinCalorie() ?? 0.0))")
                             .font(.headline)
@@ -140,19 +137,24 @@ struct DiaryView: View {
                     VStack {
                         ZStack {
                             
+                            // Circular Bar
                             Circle()
                                 .stroke(calculateDailyCalorie() ?? 0.0 <= 0.0 ? Color.red : Color.green, lineWidth: 10)
                                 .frame(width: 150, height: 150)
                             
+                            // Daily Calorie Text
                             VStack {
                                 Text(String(format: "%.0f", abs(calculateDailyCalorie() ?? 0.0)))
                                     .font(.title)
                                     .onAppear {
                                         viewModel.fetchTotalCaloriesFromFirebase()
                                     }
+                                
+                                // Calories over / Calories left Text
                                 Text(calculateDailyCalorie() ?? 0.0 <= 0.0 ? "Calories over" : "Calories left")
                                     .foregroundColor(.gray)
                                 
+                                // Detail Button
                                 NavigationLink(destination: DetailView()) {
                                     Text("Detail")
                                         .foregroundColor(.black)
@@ -164,9 +166,9 @@ struct DiaryView: View {
                             
                         }
                         
-                        //Spacer()
                     }
                     Spacer()
+                    // Total Calorie Text
                     VStack {
                         Text("\(String(format: "%.0f", viewModel.totalCalories))")
                             .font(.headline)
@@ -182,8 +184,8 @@ struct DiaryView: View {
                 .padding(.top, 40)
                 .padding(.bottom, 40)
                 
-                ScrollView(.horizontal) {
-                    HStack(spacing: 0) {
+                ScrollView(.vertical) {
+                    VStack(spacing: -20) {
                         if viewModel.mealFree != "" {
                             let selectedMeal = "Calories"
                             VStack {
@@ -202,7 +204,7 @@ struct DiaryView: View {
                                             .foregroundColor(.blue)
                                             .bold()
                                         Spacer()
-                                        Text("\(String(viewModel.totalCalories)) kcal")
+                                        Text("\(String(format: "%.0f", viewModel.totalCalories)) kcal")
                                             .onAppear {
                                                 viewModel.fetchTotalCaloriesFromFirebase()
                                             }
@@ -248,7 +250,7 @@ struct DiaryView: View {
                                             .foregroundColor(.blue)
                                             .bold()
                                         Spacer()
-                                        Text("\(String(totalCalories)) kcal")
+                                        Text("\(String(format: "%.0f", totalCalories)) kcal")
                                             .onAppear {
                                                 viewModel.fetchTotalCaloriesForMealTitle(mealTitle: meal)
                                             }
@@ -277,8 +279,6 @@ struct DiaryView: View {
                         }
                     }
                 }
-                
-                
                 
                 Spacer()
             }

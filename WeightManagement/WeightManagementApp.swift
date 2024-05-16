@@ -20,7 +20,7 @@ struct WeightManagementApp: App {
     
     var body: some Scene {
         WindowGroup {
-            WelcomeView()
+            SplashScreenView()
                 .environmentObject(userDataStore)
         }
     }

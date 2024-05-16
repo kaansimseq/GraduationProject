@@ -13,6 +13,7 @@ struct FoodDetailsView: View {
     
     var detailsFood: UserViewModel.Food
     
+    // Delete Food Function
     func deleteFoodFromDatabase() {
         guard let currentUser = Auth.auth().currentUser else {
             return
@@ -39,6 +40,7 @@ struct FoodDetailsView: View {
             VStack() {
                 
                 VStack {
+                    // Food Name
                     Text(detailsFood.foodName)
                         .font(.title3)
                         .bold()
@@ -47,18 +49,21 @@ struct FoodDetailsView: View {
                     Divider()
                     
                     VStack {
+                        // Carbs
                         HStack {
                             Image(systemName: "c.circle")
                             Text("Carbs")
                             Spacer()
                             Text("\(detailsFood.carbs) g")
                         }
+                        // Protein
                         HStack {
                             Image(systemName: "p.circle")
                             Text("Protein")
                             Spacer()
                             Text("\(detailsFood.protein) g")
                         }
+                        // Fat
                         HStack {
                             Image(systemName: "f.circle")
                             Text("Fat")

@@ -17,17 +17,21 @@ struct HomeView: View {
             
             TabView {
                 
+                // DiaryView
                 DiaryView()
                     .tabItem {
                         Image(systemName: "chart.bar.doc.horizontal")
                         Text("Diary")
                     }
+                
+                // SuggestionView
                 SuggestionView()
                     .tabItem {
                         Image(systemName: "fork.knife.circle")
                         Text("Suggestion")
                     }
                 
+                // ProfileView
                 ProfileView()
                     .tabItem {
                         Image(systemName: "person.circle")

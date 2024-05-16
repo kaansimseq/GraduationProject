@@ -25,13 +25,14 @@ struct AddFoodView: View {
             Color.white.edgesIgnoringSafeArea(.all)
             
             VStack {
-                
                 HStack {
                     // Add Food Title
                     Text("Add Food")
                         .font(.title)
                         .bold()
+                    
                     Spacer()
+                    
                     // Exit Button
                     Button(action: {
                         self.presentationMode.wrappedValue.dismiss()
@@ -48,6 +49,7 @@ struct AddFoodView: View {
                 .padding(.top, 15)
                 
                 HStack {
+                    // Textfield
                     HStack {
                         // Search Icon
                         Image(systemName: "magnifyingglass")
@@ -61,13 +63,12 @@ struct AddFoodView: View {
                     .background(Color.gray.opacity(0.3))
                     .cornerRadius(10)
                     
-                    
+                    // Search Button
                     Button(action: {
                         
                         viewModel.fetchSearchResults()
                         
                     }) {
-                        // Search Icon
                         Image(systemName: "magnifyingglass")
                             .foregroundColor(.blue)
                             .bold()
@@ -114,9 +115,7 @@ struct AddFoodView: View {
                     }
                 }
                 
-                
             }
-            
             .navigationBarBackButtonHidden(true)
         }
         

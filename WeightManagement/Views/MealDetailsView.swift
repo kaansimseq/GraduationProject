@@ -22,11 +22,12 @@ struct MealDetailsView: View {
         // Get the UID when the user logs in.
         if let currentUser = Auth.auth().currentUser {
             let userUID = currentUser.uid
-            viewModel.fetchDataFoods(forUID: userUID, mealTitle: mealTitle) // mealTitle'a göre filtreleme yapılıyor
-            viewModel.listenForDataChanges(mealTitle: mealTitle) // mealTitle'a göre dinleme yapılıyor
+            viewModel.fetchDataFoods(forUID: userUID, mealTitle: mealTitle) // filtering by mealTitle
+            viewModel.listenForDataChanges(mealTitle: mealTitle) // listening according to mealTitle
         }
     }
     
+    // Calculate Total Calories
     func totalCalories() -> String {
         var total = 0.0
         
@@ -41,6 +42,7 @@ struct MealDetailsView: View {
         return formattedTotal
     }
     
+    // Calculate Total Nutrition Values
     func totalNutritionalValues() -> (Double, Double, Double) {
         var totalCarbs = 0.0
         var totalProtein = 0.0
@@ -71,6 +73,7 @@ struct MealDetailsView: View {
                     
                     Spacer()
                     
+                    // Exit Button
                     Button(action: {
                         self.presentationMode.wrappedValue.dismiss()
                     }) {
@@ -93,10 +96,12 @@ struct MealDetailsView: View {
                         .foregroundColor(.blue)
                         .bold()
                     Spacer()
+                    // Total Calories Text
                     Text("\(totalCalories()) kcal")
                     Spacer()
                     Spacer()
                     Spacer()
+                    // Details Button
                     NavigationLink(destination: MealFoodsDetailsView(totalNutritionalValues: totalNutritionalValues(), mealTitle: mealTitle)) {
                         Text("Details")
                             .foregroundColor(.blue)
@@ -146,6 +151,7 @@ struct MealDetailsView: View {
                     }
                 }
                 
+                // Add Food Button
                 NavigationLink(destination: AddFoodView(mealTitle: mealTitle)) {
                     Image(systemName: "plus.circle.fill")
                         .foregroundColor(.blue)
@@ -153,7 +159,6 @@ struct MealDetailsView: View {
                         .foregroundColor(.blue)
                         .bold()
                 }
-                
                 
             }
             .padding()

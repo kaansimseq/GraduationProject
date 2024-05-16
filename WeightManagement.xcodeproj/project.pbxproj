@@ -21,6 +21,7 @@
 		6B0D7EE02BE13DF90009230C /* FoodDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B0D7EDF2BE13DF90009230C /* FoodDetailsView.swift */; };
 		6B9A67732BE5186F00D4DFA2 /* MealFoodsDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B9A67722BE5186F00D4DFA2 /* MealFoodsDetailsView.swift */; };
 		6B9A67772BF14DD700D4DFA2 /* DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B9A67762BF14DD700D4DFA2 /* DetailView.swift */; };
+		6B9A67792BF2A24E00D4DFA2 /* SplashScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B9A67782BF2A24E00D4DFA2 /* SplashScreenView.swift */; };
 		6B9A8AF82BAF07DA000E3D17 /* ForgotPswView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B9A8AF72BAF07DA000E3D17 /* ForgotPswView.swift */; };
 		6B9A8AFA2BAF1B78000E3D17 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 6B9A8AF92BAF1B78000E3D17 /* GoogleService-Info.plist */; };
 		6B9A8AFD2BAF1EF1000E3D17 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 6B9A8AFC2BAF1EF1000E3D17 /* FirebaseAuth */; };
@@ -59,6 +60,7 @@
 		6B0D7EDF2BE13DF90009230C /* FoodDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodDetailsView.swift; sourceTree = "<group>"; };
 		6B9A67722BE5186F00D4DFA2 /* MealFoodsDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealFoodsDetailsView.swift; sourceTree = "<group>"; };
 		6B9A67762BF14DD700D4DFA2 /* DetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailView.swift; sourceTree = "<group>"; };
+		6B9A67782BF2A24E00D4DFA2 /* SplashScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashScreenView.swift; sourceTree = "<group>"; };
 		6B9A8AF72BAF07DA000E3D17 /* ForgotPswView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgotPswView.swift; sourceTree = "<group>"; };
 		6B9A8AF92BAF1B78000E3D17 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		6B9A8B022BAF2621000E3D17 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
@@ -146,6 +148,7 @@
 		6BAB0FA02BA9CD0200E2E64F /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				6B9A67782BF2A24E00D4DFA2 /* SplashScreenView.swift */,
 				6BAB0FB02BACAF3500E2E64F /* WelcomeView.swift */,
 				6BAB0FA12BA9CD2D00E2E64F /* LoginView.swift */,
 				6B9A8AF72BAF07DA000E3D17 /* ForgotPswView.swift */,
@@ -278,6 +281,7 @@
 				6BAB0FA52BA9D99D00E2E64F /* String.swift in Sources */,
 				6B9A67772BF14DD700D4DFA2 /* DetailView.swift in Sources */,
 				6B0D7EBE2BC418090009230C /* ProfileView.swift in Sources */,
+				6B9A67792BF2A24E00D4DFA2 /* SplashScreenView.swift in Sources */,
 				6B0D7EE02BE13DF90009230C /* FoodDetailsView.swift in Sources */,
 				6B0D7ECB2BD162B10009230C /* AboutView.swift in Sources */,
 				6B0D7EC02BC418C90009230C /* SuggestionView.swift in Sources */,
@@ -426,6 +430,7 @@
 				DEVELOPMENT_TEAM = V68ZM8TA8K;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = FitCal;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -455,6 +460,7 @@
 				DEVELOPMENT_TEAM = V68ZM8TA8K;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = FitCal;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

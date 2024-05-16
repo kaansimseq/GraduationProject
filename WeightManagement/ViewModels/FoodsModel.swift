@@ -12,7 +12,39 @@ class ViewModel: ObservableObject {
     @Published var searchText: String = ""
     @Published var selectedFood: Food?
     @Published var foodItems: [Food] = []
+    //@Published var randomFood: [Recipe] = []
     
+    // FoodGetResult
+    struct RecipeResult: Codable {
+        let recipe: Recipe
+    }
+    
+    struct Recipe: Codable {
+        let gramsPerPortion, recipeDescription, recipeName: String
+        let recipeURL: String
+        let servingSizes: ServingSizes
+        
+        enum CodingKeys: String, CodingKey {
+            case gramsPerPortion = "grams_per_portion"
+            case recipeDescription = "recipe_description"
+            case recipeName = "recipe_name"
+            case recipeURL = "recipe_url"
+            case servingSizes = "serving_sizes"
+        }
+    }
+    
+    struct ServingSizes: Codable {
+        let serving: Serving
+    }
+    
+    struct Serving: Codable {
+        let calories: String
+        let carbohydrate: String
+        let fat: String
+        let protein: String
+    }
+    
+    // FoodSearchResult
     struct FoodSearchResult: Codable {
         let foods: Foods
     }
@@ -152,7 +184,7 @@ class ViewModel: ObservableObject {
         var request = URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: 10.0)
         
         let header = [
-            "Authorization": "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjQ4NDUzNUJFOUI2REY5QzM3M0VDNUNBRTRGMEJFNUE2QTk3REQ3QkMiLCJ0eXAiOiJhdCtqd3QiLCJ4NXQiOiJTRVUxdnB0dC1jTno3Rnl1VHd2bHBxbDkxN3cifQ.eyJuYmYiOjE3MTU1Mjc4MDAsImV4cCI6MTcxNTYxNDIwMCwiaXNzIjoiaHR0cHM6Ly9vYXV0aC5mYXRzZWNyZXQuY29tIiwiYXVkIjoiYmFzaWMiLCJjbGllbnRfaWQiOiJkMjhhOTgzZTMyYTQ0NWE3YTA0ZWM3MmJmZTAxN2JiNSIsInNjb3BlIjpbImJhc2ljIl19.qFxPVM7Uj5Iu7sCHNIM22tmCu7OHNAFy_9uUZR2s19u7FsqJrjdMH1nFnYgoAN8kkYKph-TfizlUQE30SkygeMMle4q8JnKTTJlzwmWQ7rWOIof8-9ZOivr3mmallDrM66F3FaHRMUvpNaRfgmAxW73iapGMLR1ASQkDSSq_oOwu-Ls3AuksOgm7AsWfYExbAGdJFnZ7vFsBk8K95UCmg1YJKAlv7zydFGaNTKjpOp51ha31_yLg8H3VPsgUpaMyfG3OmU1y_IrRkinSDkW0M6UJxhAiNUh16yMbQbgZkqFu2-H-BnaTDjTnEpB_yc-EXznLGD7SKsx4GEgAWU5Avg",
+            "Authorization": "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjQ4NDUzNUJFOUI2REY5QzM3M0VDNUNBRTRGMEJFNUE2QTk3REQ3QkMiLCJ0eXAiOiJhdCtqd3QiLCJ4NXQiOiJTRVUxdnB0dC1jTno3Rnl1VHd2bHBxbDkxN3cifQ.eyJuYmYiOjE3MTU4NjE3MzQsImV4cCI6MTcxNTk0ODEzNCwiaXNzIjoiaHR0cHM6Ly9vYXV0aC5mYXRzZWNyZXQuY29tIiwiYXVkIjoiYmFzaWMiLCJjbGllbnRfaWQiOiJkMjhhOTgzZTMyYTQ0NWE3YTA0ZWM3MmJmZTAxN2JiNSIsInNjb3BlIjpbImJhc2ljIl19.peE4yJxJo_1-Ubeuth2ditasSmu7KXzdvx6EcLX5q1YXJBXj0Bf3XN1A3S_9PXM5_l7kz-RAeurbPAjE9D1UiVdLq5EZpOBQSsD_QvJC6sr59TvetBdtyhih2RAX9XLM2E2BHZpsALiwqQIpHrcJ8QsYDlBfNRwJYcxByls1IUY-XN2Ks0vWvQfKL4nq1dAo3zHbKjqxH-40qn9XxvcdIA362qhKGXYbBFMm58Zzqyio-T9JXpaBvoTy9J0DJtOIOGEdpzfozb1UfOGs2xPl08LxffifH0FRj1OBYQYE2oUGfdy0nPJwfLjvPqHj_mZPlA8ukzhICmeTULt6U0Zeig",
             "X-RapidAPI-Key": "e383cc1b7dmsh7e4874f7d9f9851p121bb4jsnec2469238335",
             "X-RapidAPI-Host": "fatsecret4.p.rapidapi.com"
         ]
@@ -180,5 +212,101 @@ class ViewModel: ObservableObject {
         
         dataTask.resume()
     }
+    
+    func fetchRandomRecipe(completion: @escaping (Result<Recipe, Error>) -> Void) {
+        // Başlangıçta geçerli bir recipe ID yok
+        var validRecipeID: Int?
+        
+        // Rastgele bir recipeID oluşturma ve geçerli olana kadar dene
+        while validRecipeID == nil {
+            let randomRecipeID = Int.random(in: 1...1000) // Değişebilir, API'nin recipeID aralığına göre ayarlayabilirsiniz
+            
+            guard let url = URL(string: "https://fatsecret4.p.rapidapi.com/rest/server.api?recipe_id=\(randomRecipeID)&method=recipe.get.v2&format=json") else {
+                completion(.failure(NSError(domain: "Invalid URL", code: 0, userInfo: nil)))
+                return
+            }
+            
+            let headers = [
+                "X-RapidAPI-Key": "e383cc1b7dmsh7e4874f7d9f9851p121bb4jsnec2469238335",
+                "X-RapidAPI-Host": "fatsecret4.p.rapidapi.com",
+                "Authorization": "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjQ4NDUzNUJFOUI2REY5QzM3M0VDNUNBRTRGMEJFNUE2QTk3REQ3QkMiLCJ0eXAiOiJhdCtqd3QiLCJ4NXQiOiJTRVUxdnB0dC1jTno3Rnl1VHd2bHBxbDkxN3cifQ.eyJuYmYiOjE3MTU4NjE3MzQsImV4cCI6MTcxNTk0ODEzNCwiaXNzIjoiaHR0cHM6Ly9vYXV0aC5mYXRzZWNyZXQuY29tIiwiYXVkIjoiYmFzaWMiLCJjbGllbnRfaWQiOiJkMjhhOTgzZTMyYTQ0NWE3YTA0ZWM3MmJmZTAxN2JiNSIsInNjb3BlIjpbImJhc2ljIl19.peE4yJxJo_1-Ubeuth2ditasSmu7KXzdvx6EcLX5q1YXJBXj0Bf3XN1A3S_9PXM5_l7kz-RAeurbPAjE9D1UiVdLq5EZpOBQSsD_QvJC6sr59TvetBdtyhih2RAX9XLM2E2BHZpsALiwqQIpHrcJ8QsYDlBfNRwJYcxByls1IUY-XN2Ks0vWvQfKL4nq1dAo3zHbKjqxH-40qn9XxvcdIA362qhKGXYbBFMm58Zzqyio-T9JXpaBvoTy9J0DJtOIOGEdpzfozb1UfOGs2xPl08LxffifH0FRj1OBYQYE2oUGfdy0nPJwfLjvPqHj_mZPlA8ukzhICmeTULt6U0Zeig"
+            ]
+            
+            var request = URLRequest(url: url)
+            request.httpMethod = "GET"
+            request.allHTTPHeaderFields = headers
+            
+            let semaphore = DispatchSemaphore(value: 0)
+            
+            let session = URLSession.shared
+            let dataTask = session.dataTask(with: request) { (data, response, error) in
+                guard let data = data else {
+                    // Veri yoksa veya bir hata varsa, geçerli bir ID bulunamadı demektir
+                    semaphore.signal()
+                    return
+                }
+                
+                do {
+                    // Veri varsa, JSON'u decode et ve geçerli bir ID olduğunu işaretle
+                    let recipeResult = try JSONDecoder().decode(RecipeResult.self, from: data)
+                    validRecipeID = randomRecipeID
+                    semaphore.signal()
+                } catch {
+                    // Hata varsa, geçerli bir ID değil demektir, bir sonraki döngüde başka bir ID denenecek
+                    semaphore.signal()
+                }
+            }
+            
+            dataTask.resume()
+            
+            // Veri alınıncaya kadar bekleyin
+            _ = semaphore.wait(timeout: .now() + 2) // 5 saniye süre ile bekleyin (ayarlayabilirsiniz)
+        }
+        
+        // Geçerli bir ID bulunduğunda, bu ID ile API'den veri çek
+        guard let validID = validRecipeID else {
+            completion(.failure(NSError(domain: "No valid ID found", code: 0, userInfo: nil)))
+            return
+        }
+        
+        let validURL = "https://fatsecret4.p.rapidapi.com/rest/server.api?recipe_id=\(validID)&method=recipe.get.v2&format=json"
+        
+        guard let url = URL(string: validURL) else {
+            completion(.failure(NSError(domain: "Invalid URL", code: 0, userInfo: nil)))
+            return
+        }
+        
+        let headers = [
+            "X-RapidAPI-Key": "e383cc1b7dmsh7e4874f7d9f9851p121bb4jsnec2469238335",
+            "X-RapidAPI-Host": "fatsecret4.p.rapidapi.com",
+            "Authorization": "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjQ4NDUzNUJFOUI2REY5QzM3M0VDNUNBRTRGMEJFNUE2QTk3REQ3QkMiLCJ0eXAiOiJhdCtqd3QiLCJ4NXQiOiJTRVUxdnB0dC1jTno3Rnl1VHd2bHBxbDkxN3cifQ.eyJuYmYiOjE3MTU4NjE3MzQsImV4cCI6MTcxNTk0ODEzNCwiaXNzIjoiaHR0cHM6Ly9vYXV0aC5mYXRzZWNyZXQuY29tIiwiYXVkIjoiYmFzaWMiLCJjbGllbnRfaWQiOiJkMjhhOTgzZTMyYTQ0NWE3YTA0ZWM3MmJmZTAxN2JiNSIsInNjb3BlIjpbImJhc2ljIl19.peE4yJxJo_1-Ubeuth2ditasSmu7KXzdvx6EcLX5q1YXJBXj0Bf3XN1A3S_9PXM5_l7kz-RAeurbPAjE9D1UiVdLq5EZpOBQSsD_QvJC6sr59TvetBdtyhih2RAX9XLM2E2BHZpsALiwqQIpHrcJ8QsYDlBfNRwJYcxByls1IUY-XN2Ks0vWvQfKL4nq1dAo3zHbKjqxH-40qn9XxvcdIA362qhKGXYbBFMm58Zzqyio-T9JXpaBvoTy9J0DJtOIOGEdpzfozb1UfOGs2xPl08LxffifH0FRj1OBYQYE2oUGfdy0nPJwfLjvPqHj_mZPlA8ukzhICmeTULt6U0Zeig"
+        ]
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.allHTTPHeaderFields = headers
+        
+        let session = URLSession.shared
+        let dataTask = session.dataTask(with: request) { (data, response, error) in
+            guard let data = data else {
+                if let error = error {
+                    completion(.failure(error))
+                } else {
+                    completion(.failure(NSError(domain: "Unknown error", code: 0, userInfo: nil)))
+                }
+                return
+            }
+            
+            do {
+                let recipeResult = try JSONDecoder().decode(RecipeResult.self, from: data)
+                completion(.success(recipeResult.recipe))
+            } catch {
+                completion(.failure(error))
+            }
+        }
+        
+        dataTask.resume()
+    }
+    
     
 }

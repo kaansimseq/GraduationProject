@@ -22,7 +22,7 @@ struct DetailView: View {
             viewModel.fetchTotalNutrientsFromFirebase()
         }
     }
-
+    
     var body: some View {
         
         ZStack {
@@ -30,8 +30,8 @@ struct DetailView: View {
             
             VStack {
                 
+                // Pie Chart
                 Chart {
-                    // Her bir değeri ayrı ayrı ele alarak SectorMark oluşturma
                     SectorMark(angle: .value("Carbs", viewModel.totalCarbs), innerRadius: .ratio(0.5), angularInset: 1)
                         .cornerRadius(6)
                         .foregroundStyle(.orange)
@@ -45,9 +45,9 @@ struct DetailView: View {
                 .frame(width: 200, height: 200)
                 .padding()
                 
-                
+                // Title
                 VStack {
-                    Text("Total Nutrition Details")
+                    Text("Daily Total Nutrition Details")
                         .font(.title3)
                         .bold()
                         .padding()
@@ -55,6 +55,7 @@ struct DetailView: View {
                     Divider()
                     
                     VStack {
+                        // Carbs
                         HStack {
                             Image(systemName: "c.circle")
                                 .foregroundColor(.orange)
@@ -62,6 +63,7 @@ struct DetailView: View {
                             Spacer()
                             Text("\(String(format: "%.2f", viewModel.totalCarbs)) g")
                         }
+                        // Protein
                         HStack {
                             Image(systemName: "p.circle")
                                 .foregroundColor(.red)
@@ -69,6 +71,7 @@ struct DetailView: View {
                             Spacer()
                             Text("\(String(format: "%.2f", viewModel.totalProtein)) g")
                         }
+                        // Fat
                         HStack {
                             Image(systemName: "f.circle")
                                 .foregroundColor(.yellow)

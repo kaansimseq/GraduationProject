@@ -17,14 +17,22 @@ struct WelcomeView: View {
                 
                 VStack {
                     
-                    //Title
-                    Text("Fit and Healthy Life!")
+                    // Logo
+                    Image("logo")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 160, height: 160)
+                        .padding(.bottom, 10)
+                    
+                    // Title
+                    Text("Fit and Healthy Life with FitCal!")
                         .font(.largeTitle)
                         .bold()
                         .italic()
+                        .multilineTextAlignment(.center)
                         .padding(.bottom, 50)
                     
-                    //Sign up and Start Button
+                    // Sign up and Start Button
                     NavigationLink(destination: SignupInfoView()) {
                         Text("Sign up and Start")
                             .foregroundColor(.white)
@@ -40,7 +48,7 @@ struct WelcomeView: View {
                     }
                     .padding(.bottom, 15)
                     
-                    //Login Button
+                    // Login Button
                     NavigationLink(destination: LoginView()) {
                         Text("Already have an account? Login")
                             .foregroundColor(.black.opacity(0.7))
@@ -49,8 +57,8 @@ struct WelcomeView: View {
                     
                 }
             }
-
-
+            
+            
         }
         
     }
