@@ -43,7 +43,8 @@ struct AddFoodDetailsView: View {
             "calories": calculateCalories() ?? "",
             "carbs": calculateCarbs() ?? "",
             "protein": calculateProtein() ?? "",
-            "fat": calculateFat() ?? ""
+            "fat": calculateFat() ?? "",
+            "date": Timestamp(date: Date()) // Add the current date
         ]) { err in
             if let err = err {
                 print("Error adding document: \(err)")

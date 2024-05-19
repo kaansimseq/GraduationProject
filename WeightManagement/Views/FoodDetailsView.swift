@@ -119,5 +119,5 @@ struct FoodDetailsView: View {
 }
 
 #Preview {
-    FoodDetailsView(detailsFood: UserViewModel.Food(foodID: "", foodName: "", amount: "", calories: "", carbs: "", protein: "", fat: ""))
+    FoodDetailsView(detailsFood: UserViewModel.Food(foodID: "", foodName: "", amount: "", calories: "", carbs: "", protein: "", fat: "", date: Date()))
 }

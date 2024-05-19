@@ -12,9 +12,8 @@ class ViewModel: ObservableObject {
     @Published var searchText: String = ""
     @Published var selectedFood: Food?
     @Published var foodItems: [Food] = []
-    //@Published var randomFood: [Recipe] = []
     
-    // FoodGetResult
+    // RecipeResult
     struct RecipeResult: Codable {
         let recipe: Recipe
     }
@@ -87,7 +86,7 @@ class ViewModel: ObservableObject {
         var servingSizeNumeric: String? {
             let components = foodDescription.components(separatedBy: " - ")
             if let servingSizeString = components.first {
-                // "Per " ve "g" kısımlarını kaldırıp, sadece sayısal değeri alıyoruz
+                // We remove the "per " and "g" parts and take only the numeric value
                 let numericValue = servingSizeString.replacingOccurrences(of: "Per ", with: "").replacingOccurrences(of: "g", with: "").trimmingCharacters(in: .whitespaces)
                 return numericValue
             }
@@ -103,7 +102,7 @@ class ViewModel: ObservableObject {
                     let key = info[0]
                     let value = info[1]
                     if key.lowercased().contains("calories") {
-                        // Sayısal değeri almak için "kcal" kısmını kaldırarak sadece sayıları alabiliriz
+                        // To get the numerical value, we can remove the "kcal" part and just get the numbers
                         let numericValue = value.replacingOccurrences(of: "kcal", with: "").trimmingCharacters(in: .whitespaces)
                         return numericValue
                     }
@@ -121,7 +120,7 @@ class ViewModel: ObservableObject {
                     let key = info[0]
                     let value = info[1]
                     if key.lowercased().contains("fat") {
-                        // Sayısal değeri almak için "g" kısmını kaldırarak sadece sayıları alabiliriz
+                        // To get the numeric value, we can remove the "g" and get only the numbers
                         let numericValue = value.replacingOccurrences(of: "g", with: "").trimmingCharacters(in: .whitespaces)
                         return numericValue
                     }
@@ -139,7 +138,6 @@ class ViewModel: ObservableObject {
                     let key = info[0]
                     let value = info[1]
                     if key.lowercased().contains("carbs") {
-                        // Sayısal değeri almak için "g" kısmını kaldırarak sadece sayıları alabiliriz
                         let numericValue = value.replacingOccurrences(of: "g", with: "").trimmingCharacters(in: .whitespaces)
                         return numericValue
                     }
@@ -157,7 +155,6 @@ class ViewModel: ObservableObject {
                     let key = info[0]
                     let value = info[1]
                     if key.lowercased().contains("protein") {
-                        // Sayısal değeri almak için "g" kısmını kaldırarak sadece sayıları alabiliriz
                         let numericValue = value.replacingOccurrences(of: "g", with: "").trimmingCharacters(in: .whitespaces)
                         return numericValue
                     }
@@ -167,6 +164,7 @@ class ViewModel: ObservableObject {
         }
     }
     
+    // Fetch Search Result Function
     func fetchSearchResults() {
         guard !searchText.isEmpty else {
             print("Search text is empty")
@@ -184,7 +182,7 @@ class ViewModel: ObservableObject {
         var request = URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: 10.0)
         
         let header = [
-            "Authorization": "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjQ4NDUzNUJFOUI2REY5QzM3M0VDNUNBRTRGMEJFNUE2QTk3REQ3QkMiLCJ0eXAiOiJhdCtqd3QiLCJ4NXQiOiJTRVUxdnB0dC1jTno3Rnl1VHd2bHBxbDkxN3cifQ.eyJuYmYiOjE3MTU4NjE3MzQsImV4cCI6MTcxNTk0ODEzNCwiaXNzIjoiaHR0cHM6Ly9vYXV0aC5mYXRzZWNyZXQuY29tIiwiYXVkIjoiYmFzaWMiLCJjbGllbnRfaWQiOiJkMjhhOTgzZTMyYTQ0NWE3YTA0ZWM3MmJmZTAxN2JiNSIsInNjb3BlIjpbImJhc2ljIl19.peE4yJxJo_1-Ubeuth2ditasSmu7KXzdvx6EcLX5q1YXJBXj0Bf3XN1A3S_9PXM5_l7kz-RAeurbPAjE9D1UiVdLq5EZpOBQSsD_QvJC6sr59TvetBdtyhih2RAX9XLM2E2BHZpsALiwqQIpHrcJ8QsYDlBfNRwJYcxByls1IUY-XN2Ks0vWvQfKL4nq1dAo3zHbKjqxH-40qn9XxvcdIA362qhKGXYbBFMm58Zzqyio-T9JXpaBvoTy9J0DJtOIOGEdpzfozb1UfOGs2xPl08LxffifH0FRj1OBYQYE2oUGfdy0nPJwfLjvPqHj_mZPlA8ukzhICmeTULt6U0Zeig",
+            "Authorization": "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjQ4NDUzNUJFOUI2REY5QzM3M0VDNUNBRTRGMEJFNUE2QTk3REQ3QkMiLCJ0eXAiOiJhdCtqd3QiLCJ4NXQiOiJTRVUxdnB0dC1jTno3Rnl1VHd2bHBxbDkxN3cifQ.eyJuYmYiOjE3MTYwNDQwNjEsImV4cCI6MTcxNjEzMDQ2MSwiaXNzIjoiaHR0cHM6Ly9vYXV0aC5mYXRzZWNyZXQuY29tIiwiYXVkIjoiYmFzaWMiLCJjbGllbnRfaWQiOiJkMjhhOTgzZTMyYTQ0NWE3YTA0ZWM3MmJmZTAxN2JiNSIsInNjb3BlIjpbImJhc2ljIl19.XiraF6laUrBtMlLdwO3omPilv6V2CnJ0fMcrQAo0cPxaSSTs4BibVew7h_ERp5jLEa-r2axXCSVs8lCtbT-_kSSdgc9kSTXtuuLQ5IARmMzaeU3MtzLASlpdAzQb_Nyg0Ado4JqF8BxeYFf83r-K4uKMzs9ii0jaT_ICOtlrjdZXVtYjfEL4-Vk6Q_5PQwKjnuas-qS2YDnvb0iKoT14mMLgxzCqqze-SHWdzmBQxbXhomKPACXPNKlYwhPPEJZ26U3QVSqPJUUOqNVtV7NosTZBoXbM6OTaksqqR2N11tNQxFCbT9uhAc4FNyoH7nwgRpO2z1LOGF6esPtUffa2Ag",
             "X-RapidAPI-Key": "e383cc1b7dmsh7e4874f7d9f9851p121bb4jsnec2469238335",
             "X-RapidAPI-Host": "fatsecret4.p.rapidapi.com"
         ]
@@ -213,13 +211,14 @@ class ViewModel: ObservableObject {
         dataTask.resume()
     }
     
+    // Fetch Random Recipe Function
     func fetchRandomRecipe(completion: @escaping (Result<Recipe, Error>) -> Void) {
-        // Başlangıçta geçerli bir recipe ID yok
+        
         var validRecipeID: Int?
         
-        // Rastgele bir recipeID oluşturma ve geçerli olana kadar dene
+        // Generate a random recipeID and try it until it is valid
         while validRecipeID == nil {
-            let randomRecipeID = Int.random(in: 1...1000) // Değişebilir, API'nin recipeID aralığına göre ayarlayabilirsiniz
+            let randomRecipeID = Int.random(in: 1...1000)
             
             guard let url = URL(string: "https://fatsecret4.p.rapidapi.com/rest/server.api?recipe_id=\(randomRecipeID)&method=recipe.get.v2&format=json") else {
                 completion(.failure(NSError(domain: "Invalid URL", code: 0, userInfo: nil)))
@@ -229,7 +228,7 @@ class ViewModel: ObservableObject {
             let headers = [
                 "X-RapidAPI-Key": "e383cc1b7dmsh7e4874f7d9f9851p121bb4jsnec2469238335",
                 "X-RapidAPI-Host": "fatsecret4.p.rapidapi.com",
-                "Authorization": "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjQ4NDUzNUJFOUI2REY5QzM3M0VDNUNBRTRGMEJFNUE2QTk3REQ3QkMiLCJ0eXAiOiJhdCtqd3QiLCJ4NXQiOiJTRVUxdnB0dC1jTno3Rnl1VHd2bHBxbDkxN3cifQ.eyJuYmYiOjE3MTU4NjE3MzQsImV4cCI6MTcxNTk0ODEzNCwiaXNzIjoiaHR0cHM6Ly9vYXV0aC5mYXRzZWNyZXQuY29tIiwiYXVkIjoiYmFzaWMiLCJjbGllbnRfaWQiOiJkMjhhOTgzZTMyYTQ0NWE3YTA0ZWM3MmJmZTAxN2JiNSIsInNjb3BlIjpbImJhc2ljIl19.peE4yJxJo_1-Ubeuth2ditasSmu7KXzdvx6EcLX5q1YXJBXj0Bf3XN1A3S_9PXM5_l7kz-RAeurbPAjE9D1UiVdLq5EZpOBQSsD_QvJC6sr59TvetBdtyhih2RAX9XLM2E2BHZpsALiwqQIpHrcJ8QsYDlBfNRwJYcxByls1IUY-XN2Ks0vWvQfKL4nq1dAo3zHbKjqxH-40qn9XxvcdIA362qhKGXYbBFMm58Zzqyio-T9JXpaBvoTy9J0DJtOIOGEdpzfozb1UfOGs2xPl08LxffifH0FRj1OBYQYE2oUGfdy0nPJwfLjvPqHj_mZPlA8ukzhICmeTULt6U0Zeig"
+                "Authorization": "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjQ4NDUzNUJFOUI2REY5QzM3M0VDNUNBRTRGMEJFNUE2QTk3REQ3QkMiLCJ0eXAiOiJhdCtqd3QiLCJ4NXQiOiJTRVUxdnB0dC1jTno3Rnl1VHd2bHBxbDkxN3cifQ.eyJuYmYiOjE3MTYwNDQwNjEsImV4cCI6MTcxNjEzMDQ2MSwiaXNzIjoiaHR0cHM6Ly9vYXV0aC5mYXRzZWNyZXQuY29tIiwiYXVkIjoiYmFzaWMiLCJjbGllbnRfaWQiOiJkMjhhOTgzZTMyYTQ0NWE3YTA0ZWM3MmJmZTAxN2JiNSIsInNjb3BlIjpbImJhc2ljIl19.XiraF6laUrBtMlLdwO3omPilv6V2CnJ0fMcrQAo0cPxaSSTs4BibVew7h_ERp5jLEa-r2axXCSVs8lCtbT-_kSSdgc9kSTXtuuLQ5IARmMzaeU3MtzLASlpdAzQb_Nyg0Ado4JqF8BxeYFf83r-K4uKMzs9ii0jaT_ICOtlrjdZXVtYjfEL4-Vk6Q_5PQwKjnuas-qS2YDnvb0iKoT14mMLgxzCqqze-SHWdzmBQxbXhomKPACXPNKlYwhPPEJZ26U3QVSqPJUUOqNVtV7NosTZBoXbM6OTaksqqR2N11tNQxFCbT9uhAc4FNyoH7nwgRpO2z1LOGF6esPtUffa2Ag"
             ]
             
             var request = URLRequest(url: url)
@@ -241,29 +240,29 @@ class ViewModel: ObservableObject {
             let session = URLSession.shared
             let dataTask = session.dataTask(with: request) { (data, response, error) in
                 guard let data = data else {
-                    // Veri yoksa veya bir hata varsa, geçerli bir ID bulunamadı demektir
+                    // If there is no data or there is an error, a valid ID was not found
                     semaphore.signal()
                     return
                 }
                 
                 do {
-                    // Veri varsa, JSON'u decode et ve geçerli bir ID olduğunu işaretle
+                    // If data exists, decode the JSON and mark it as a valid ID
                     let recipeResult = try JSONDecoder().decode(RecipeResult.self, from: data)
                     validRecipeID = randomRecipeID
                     semaphore.signal()
                 } catch {
-                    // Hata varsa, geçerli bir ID değil demektir, bir sonraki döngüde başka bir ID denenecek
+                    // If there is an error, it is not a valid ID, another ID will be tried in the next loop
                     semaphore.signal()
                 }
             }
             
             dataTask.resume()
             
-            // Veri alınıncaya kadar bekleyin
-            _ = semaphore.wait(timeout: .now() + 2) // 5 saniye süre ile bekleyin (ayarlayabilirsiniz)
+            // Wait until data is received
+            _ = semaphore.wait(timeout: .now() + 2)
         }
         
-        // Geçerli bir ID bulunduğunda, bu ID ile API'den veri çek
+        // When a valid ID is found, pull data from the API with this ID
         guard let validID = validRecipeID else {
             completion(.failure(NSError(domain: "No valid ID found", code: 0, userInfo: nil)))
             return
@@ -279,7 +278,7 @@ class ViewModel: ObservableObject {
         let headers = [
             "X-RapidAPI-Key": "e383cc1b7dmsh7e4874f7d9f9851p121bb4jsnec2469238335",
             "X-RapidAPI-Host": "fatsecret4.p.rapidapi.com",
-            "Authorization": "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjQ4NDUzNUJFOUI2REY5QzM3M0VDNUNBRTRGMEJFNUE2QTk3REQ3QkMiLCJ0eXAiOiJhdCtqd3QiLCJ4NXQiOiJTRVUxdnB0dC1jTno3Rnl1VHd2bHBxbDkxN3cifQ.eyJuYmYiOjE3MTU4NjE3MzQsImV4cCI6MTcxNTk0ODEzNCwiaXNzIjoiaHR0cHM6Ly9vYXV0aC5mYXRzZWNyZXQuY29tIiwiYXVkIjoiYmFzaWMiLCJjbGllbnRfaWQiOiJkMjhhOTgzZTMyYTQ0NWE3YTA0ZWM3MmJmZTAxN2JiNSIsInNjb3BlIjpbImJhc2ljIl19.peE4yJxJo_1-Ubeuth2ditasSmu7KXzdvx6EcLX5q1YXJBXj0Bf3XN1A3S_9PXM5_l7kz-RAeurbPAjE9D1UiVdLq5EZpOBQSsD_QvJC6sr59TvetBdtyhih2RAX9XLM2E2BHZpsALiwqQIpHrcJ8QsYDlBfNRwJYcxByls1IUY-XN2Ks0vWvQfKL4nq1dAo3zHbKjqxH-40qn9XxvcdIA362qhKGXYbBFMm58Zzqyio-T9JXpaBvoTy9J0DJtOIOGEdpzfozb1UfOGs2xPl08LxffifH0FRj1OBYQYE2oUGfdy0nPJwfLjvPqHj_mZPlA8ukzhICmeTULt6U0Zeig"
+            "Authorization": "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjQ4NDUzNUJFOUI2REY5QzM3M0VDNUNBRTRGMEJFNUE2QTk3REQ3QkMiLCJ0eXAiOiJhdCtqd3QiLCJ4NXQiOiJTRVUxdnB0dC1jTno3Rnl1VHd2bHBxbDkxN3cifQ.eyJuYmYiOjE3MTYwNDQwNjEsImV4cCI6MTcxNjEzMDQ2MSwiaXNzIjoiaHR0cHM6Ly9vYXV0aC5mYXRzZWNyZXQuY29tIiwiYXVkIjoiYmFzaWMiLCJjbGllbnRfaWQiOiJkMjhhOTgzZTMyYTQ0NWE3YTA0ZWM3MmJmZTAxN2JiNSIsInNjb3BlIjpbImJhc2ljIl19.XiraF6laUrBtMlLdwO3omPilv6V2CnJ0fMcrQAo0cPxaSSTs4BibVew7h_ERp5jLEa-r2axXCSVs8lCtbT-_kSSdgc9kSTXtuuLQ5IARmMzaeU3MtzLASlpdAzQb_Nyg0Ado4JqF8BxeYFf83r-K4uKMzs9ii0jaT_ICOtlrjdZXVtYjfEL4-Vk6Q_5PQwKjnuas-qS2YDnvb0iKoT14mMLgxzCqqze-SHWdzmBQxbXhomKPACXPNKlYwhPPEJZ26U3QVSqPJUUOqNVtV7NosTZBoXbM6OTaksqqR2N11tNQxFCbT9uhAc4FNyoH7nwgRpO2z1LOGF6esPtUffa2Ag"
         ]
         
         var request = URLRequest(url: url)

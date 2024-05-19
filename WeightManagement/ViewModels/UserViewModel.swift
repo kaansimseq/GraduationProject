@@ -19,6 +19,7 @@ class UserViewModel: ObservableObject {
         var carbs: String
         var protein: String
         var fat: String
+        var date: Date
     }
     
     //Users
@@ -43,10 +44,10 @@ class UserViewModel: ObservableObject {
     //Total
     @Published var totalCalories: Double = 0.0
     @Published var totalCaloriesForMealTitles: [String: Double] = [:]
+    @Published var totalCaloriesForSelectedDate: Double = 0.0
     @Published var totalCarbs: Double = 0.0
     @Published var totalProtein: Double = 0.0
     @Published var totalFat: Double = 0.0
-    
     
     private var uid: String = ""
     
@@ -145,7 +146,7 @@ class UserViewModel: ObservableObject {
                 return
             }
             
-            var foods: [Food] = [] // Yiyeceklerin listesi
+            var foods: [Food] = []
             
             guard let documents = querySnapshot?.documents else {
                 print("No Documents")
@@ -154,6 +155,9 @@ class UserViewModel: ObservableObject {
             
             for document in documents {
                 let data = document.data()
+                
+                let timestamp = data["date"] as? Timestamp ?? Timestamp()
+                let date = timestamp.dateValue() // Convert Timestamp to Date
                 
                 self.mealTitle = data["mealTitle"] as? String ?? ""
                 
@@ -164,9 +168,10 @@ class UserViewModel: ObservableObject {
                     calories: data["calories"] as? String ?? "",
                     carbs: data["carbs"] as? String ?? "",
                     protein: data["protein"] as? String ?? "",
-                    fat: data["fat"] as? String ?? ""
+                    fat: data["fat"] as? String ?? "",
+                    date: date
                 )
-                foods.append(food) // Her bir yiyeceği listeye ekle
+                foods.append(food)
             }
             
             DispatchQueue.main.async {
@@ -175,6 +180,7 @@ class UserViewModel: ObservableObject {
         }
     }
     
+    // Listen Data Changes Function
     func listenForDataChanges(mealTitle: String) {
         db.collection("users").document(uid).collection("foods").whereField("mealTitle", isEqualTo: mealTitle).addSnapshotListener { querySnapshot, error in
             guard let snapshot = querySnapshot else {
@@ -185,114 +191,147 @@ class UserViewModel: ObservableObject {
             snapshot.documentChanges.forEach { diff in
                 if diff.type == .added {
                     print("New food: \(diff.document.data())")
-                    // Yeni bir yiyecek eklendiğinde, foods array'ini güncelleyin
+                    // Update the foods array when a new food is added
                     self.fetchDataFoods(forUID: self.uid, mealTitle: mealTitle)
                 }
                 if diff.type == .modified {
                     print("Modified food: \(diff.document.data())")
-                    // Bir yiyecek değiştirildiğinde, foods array'ini güncelleyin
+                    // Update the foods array when a food is changed
                     self.fetchDataFoods(forUID: self.uid, mealTitle: mealTitle)
                 }
                 if diff.type == .removed {
                     print("Removed food: \(diff.document.data())")
-                    // Bir yiyecek silindiğinde, foods array'ini güncelleyin
+                    // Update the foods array when a food is deleted
                     self.fetchDataFoods(forUID: self.uid, mealTitle: mealTitle)
                 }
             }
         }
     }
     
-    func fetchTotalCaloriesFromFirebase() {
-        db.collection("users").document(uid).collection("foods").getDocuments { (querySnapshot, error) in
-            if let error = error {
-                print("Error fetching documents: \(error)")
-                return
-            }
-            
-            var totalCalories = 0.0
-            
-            guard let documents = querySnapshot?.documents else {
-                print("No Documents")
-                return
-            }
-            
-            for document in documents {
-                let data = document.data()
-                if let calories = Double(data["calories"] as? String ?? "0.0") {
-                    totalCalories += calories
+    // Calculate total calories for selected date
+    func fetchTotalCaloriesForSelectedDate(selectedDate: Date) {
+        
+        // Define start and end dates for the selected day
+        let startOfDay = Calendar.current.startOfDay(for: selectedDate)
+        let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay)!
+        
+        db.collection("users").document(uid).collection("foods")
+            .whereField("date", isGreaterThanOrEqualTo: startOfDay)
+            .whereField("date", isLessThan: endOfDay)
+            .getDocuments { (querySnapshot, error) in
+                if let error = error {
+                    print("Error fetching documents: \(error)")
+                    return
                 }
+                
+                var totalCalories = 0.0
+                
+                guard let documents = querySnapshot?.documents else {
+                    print("No Documents")
+                    return
+                }
+                
+                for document in documents {
+                    let data = document.data()
+                    if let calories = Double(data["calories"] as? String ?? "0.0") {
+                        totalCalories += calories
+                    }
+                }
+                
+                // Update totalCalories for the selected date
+                self.totalCalories = totalCalories
+                
+                print("Total calories for \(selectedDate): \(totalCalories)")
             }
-            
-            self.totalCalories = totalCalories // totalCalories değerini güncelle
-            
-            print("Total calories: \(totalCalories)")
-            
-        }
     }
     
-    func fetchTotalCaloriesForMealTitle(mealTitle: String) {
-        db.collection("users").document(uid).collection("foods").whereField("mealTitle", isEqualTo: mealTitle).getDocuments { (querySnapshot, error) in
-            if let error = error {
-                print("Error fetching documents: \(error)")
-                return
-            }
-            
-            var totalCalories = 0.0
-            
-            guard let documents = querySnapshot?.documents else {
-                print("No Documents")
-                return
-            }
-            
-            for document in documents {
-                let data = document.data()
-                if let calories = Double(data["calories"] as? String ?? "0.0") {
-                    totalCalories += calories
+    // Calculate total calories for mealTitle and selected date
+    func fetchTotalCaloriesForMealTitle(mealTitle: String, selectedDate: Date) {
+        
+        // Define start and end dates for the selected day
+        let startOfDay = Calendar.current.startOfDay(for: selectedDate)
+        let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay)!
+        print("Fetching documents for mealTitle: \(mealTitle) on date: \(selectedDate)")
+        print("Start of day: \(startOfDay), End of day: \(endOfDay)")
+        
+        db.collection("users").document(uid).collection("foods")
+            .whereField("mealTitle", isEqualTo: mealTitle)
+            .whereField("date", isGreaterThanOrEqualTo: startOfDay)
+            .whereField("date", isLessThan: endOfDay)
+            .getDocuments { (querySnapshot, error) in
+                if let error = error {
+                    print("Error fetching documents: \(error)")
+                    return
+                }
+                
+                var totalCalories = 0.0
+                
+                guard let documents = querySnapshot?.documents else {
+                    print("No Documents")
+                    return
+                }
+                
+                for document in documents {
+                    let data = document.data()
+                    if let calories = Double(data["calories"] as? String ?? "0.0") {
+                        totalCalories += calories
+                    }
+                    
+                }
+                
+                DispatchQueue.main.async {
+                    self.totalCaloriesForMealTitles[mealTitle] = totalCalories
+                    print("Updated total calories for \(mealTitle): \(totalCalories)")
                 }
             }
-            
-            // Toplam kaloriyi ilgili öğün başlığına göre güncelle
-            self.totalCaloriesForMealTitles[mealTitle] = totalCalories
-        }
     }
     
-    func fetchTotalNutrientsFromFirebase() {
-        db.collection("users").document(uid).collection("foods").getDocuments { (querySnapshot, error) in
-            if let error = error {
-                print("Error fetching documents: \(error)")
-                return
-            }
-            
-            var carbsSum = 0.0
-            var proteinSum = 0.0
-            var fatSum = 0.0
-            
-            guard let documents = querySnapshot?.documents else {
-                print("No Documents")
-                return
-            }
-            
-            for document in documents {
-                let data = document.data()
-                if let carbsString = data["carbs"] as? String,
-                   let proteinString = data["protein"] as? String,
-                   let fatString = data["fat"] as? String,
-                   let carbs = Double(carbsString),
-                   let protein = Double(proteinString),
-                   let fat = Double(fatString) {
-                    carbsSum += carbs
-                    proteinSum += protein
-                    fatSum += fat
+    // Calculate total nutrition values for selected date
+    func fetchTotalNutrientsForSelectedDate(selectedDate: Date) {
+        
+        // Define start and end dates for the selected day
+        let startOfDay = Calendar.current.startOfDay(for: selectedDate)
+        let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay)!
+        
+        db.collection("users").document(uid).collection("foods")
+            .whereField("date", isGreaterThanOrEqualTo: startOfDay)
+            .whereField("date", isLessThan: endOfDay)
+            .getDocuments { (querySnapshot, error) in
+                if let error = error {
+                    print("Error fetching documents: \(error)")
+                    return
+                }
+                
+                var carbsSum = 0.0
+                var proteinSum = 0.0
+                var fatSum = 0.0
+                
+                guard let documents = querySnapshot?.documents else {
+                    print("No Documents")
+                    return
+                }
+                
+                for document in documents {
+                    let data = document.data()
+                    if let carbsString = data["carbs"] as? String,
+                       let proteinString = data["protein"] as? String,
+                       let fatString = data["fat"] as? String,
+                       let carbs = Double(carbsString),
+                       let protein = Double(proteinString),
+                       let fat = Double(fatString) {
+                        carbsSum += carbs
+                        proteinSum += protein
+                        fatSum += fat
+                    }
+                }
+                
+                // Update totalCarbs, totalProtein, and totalFat for the selected date
+                DispatchQueue.main.async {
+                    self.totalCarbs = carbsSum
+                    self.totalProtein = proteinSum
+                    self.totalFat = fatSum
                 }
             }
-            
-            DispatchQueue.main.async {
-                self.totalCarbs = carbsSum
-                self.totalProtein = proteinSum
-                self.totalFat = fatSum
-            }
-        }
     }
-    
     
 }

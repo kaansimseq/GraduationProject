@@ -11,7 +11,8 @@ import FirebaseAuth
 struct DiaryView: View {
     
     @ObservedObject private var viewModel = UserViewModel()
-    @State private var calendar = Date()
+    
+    @State private var selectedDate = Date()
     
     init() {
         // Get the UID when the user logs in.
@@ -117,7 +118,7 @@ struct DiaryView: View {
             VStack {
                 
                 // Date Picker
-                DatePicker("Hi \(viewModel.name) 👋", selection: $calendar, in: ...Date(), displayedComponents: .date)
+                DatePicker("Hi \(viewModel.name) 👋", selection: $selectedDate, in: ...Date(), displayedComponents: .date)
                     .font(.title)
                     .bold()
                     .padding(.horizontal)
@@ -147,7 +148,7 @@ struct DiaryView: View {
                                 Text(String(format: "%.0f", abs(calculateDailyCalorie() ?? 0.0)))
                                     .font(.title)
                                     .onAppear {
-                                        viewModel.fetchTotalCaloriesFromFirebase()
+                                        viewModel.fetchTotalCaloriesForSelectedDate(selectedDate: selectedDate)
                                     }
                                 
                                 // Calories over / Calories left Text
@@ -155,7 +156,7 @@ struct DiaryView: View {
                                     .foregroundColor(.gray)
                                 
                                 // Detail Button
-                                NavigationLink(destination: DetailView()) {
+                                NavigationLink(destination: DetailView(selectedDate: selectedDate)) {
                                     Text("Detail")
                                         .foregroundColor(.black)
                                         .bold()
@@ -173,7 +174,7 @@ struct DiaryView: View {
                         Text("\(String(format: "%.0f", viewModel.totalCalories))")
                             .font(.headline)
                             .onAppear {
-                                viewModel.fetchTotalCaloriesFromFirebase()
+                                viewModel.fetchTotalCaloriesForSelectedDate(selectedDate: selectedDate)
                             }
                         Text("Eaten")
                             .font(.footnote)
@@ -206,12 +207,12 @@ struct DiaryView: View {
                                         Spacer()
                                         Text("\(String(format: "%.0f", viewModel.totalCalories)) kcal")
                                             .onAppear {
-                                                viewModel.fetchTotalCaloriesFromFirebase()
+                                                viewModel.fetchTotalCaloriesForSelectedDate(selectedDate: selectedDate)
                                             }
                                         Spacer()
                                         Spacer()
                                         Spacer()
-                                        NavigationLink(destination: MealDetailsView(mealTitle: selectedMeal)) {
+                                        NavigationLink(destination: MealDetailsView(mealTitle: selectedMeal, selectedDate: selectedDate)) {
                                             Image(systemName: "arrow.right.circle")
                                                 .resizable()
                                                 .scaledToFit()
@@ -252,12 +253,15 @@ struct DiaryView: View {
                                         Spacer()
                                         Text("\(String(format: "%.0f", totalCalories)) kcal")
                                             .onAppear {
-                                                viewModel.fetchTotalCaloriesForMealTitle(mealTitle: meal)
+                                                viewModel.fetchTotalCaloriesForMealTitle(mealTitle: meal, selectedDate: selectedDate)
+                                            }
+                                            .onChange(of: selectedDate) { newValue in
+                                                viewModel.fetchTotalCaloriesForMealTitle(mealTitle: meal, selectedDate: newValue)
                                             }
                                         Spacer()
                                         Spacer()
                                         Spacer()
-                                        NavigationLink(destination: MealDetailsView(mealTitle: meal)) {
+                                        NavigationLink(destination: MealDetailsView(mealTitle: meal, selectedDate: selectedDate)) {
                                             Image(systemName: "arrow.right.circle")
                                                 .resizable()
                                                 .scaledToFit()
@@ -284,7 +288,15 @@ struct DiaryView: View {
             }
             
         }
-        
+        .onAppear {
+            viewModel.fetchTotalCaloriesForSelectedDate(selectedDate: selectedDate)
+        }
+        .onChange(of: selectedDate) { newValue in
+            viewModel.fetchTotalCaloriesForSelectedDate(selectedDate: newValue)
+            for meal in viewModel.mealBased {
+                viewModel.fetchTotalCaloriesForMealTitle(mealTitle: meal, selectedDate: newValue)
+            }
+        }
     }
 }
 

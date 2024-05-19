@@ -309,7 +309,7 @@ struct ProfileView: View {
                 // Personal Info View
                 NavigationLink(destination: PersonalInfoView()) {
                     HStack {
-                        Text("Profile Info")
+                        Text("Personal Info")
                         Spacer()
                         Image(systemName: "chevron.right")
                     }

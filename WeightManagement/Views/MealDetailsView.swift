@@ -15,9 +15,11 @@ struct MealDetailsView: View {
     @ObservedObject private var viewModel = UserViewModel()
     
     let mealTitle: String
+    let selectedDate: Date
     
-    init(mealTitle: String) {
+    init(mealTitle: String, selectedDate: Date) {
         self.mealTitle = mealTitle
+        self.selectedDate = selectedDate
         
         // Get the UID when the user logs in.
         if let currentUser = Auth.auth().currentUser {
@@ -27,11 +29,11 @@ struct MealDetailsView: View {
         }
     }
     
-    // Calculate Total Calories
+    // Calculate Total Calories for Selected Date
     func totalCalories() -> String {
         var total = 0.0
         
-        for food in viewModel.foods {
+        for food in viewModel.foods.filter { Calendar.current.isDate($0.date, inSameDayAs: selectedDate) } {
             if let calories = Double(food.calories) {
                 total += calories
             }
@@ -42,13 +44,13 @@ struct MealDetailsView: View {
         return formattedTotal
     }
     
-    // Calculate Total Nutrition Values
+    // Calculate Total Nutrition Values for Selected Date
     func totalNutritionalValues() -> (Double, Double, Double) {
         var totalCarbs = 0.0
         var totalProtein = 0.0
         var totalFat = 0.0
         
-        for food in viewModel.foods {
+        for food in viewModel.foods.filter { Calendar.current.isDate($0.date, inSameDayAs: selectedDate) } {
             if let carbs = Double(food.carbs), let protein = Double(food.protein), let fat = Double(food.fat) {
                 totalCarbs += carbs
                 totalProtein += protein
@@ -116,7 +118,7 @@ struct MealDetailsView: View {
                 Spacer()
                 
                 ScrollView {
-                    ForEach(viewModel.foods, id: \.foodName) { food in
+                    ForEach(viewModel.foods.filter { Calendar.current.isDate($0.date, inSameDayAs: selectedDate) }, id: \.foodName) { food in
                         VStack(alignment: .leading) {
                             HStack {
                                 VStack(alignment: .leading) {
@@ -153,12 +155,14 @@ struct MealDetailsView: View {
                 
                 // Add Food Button
                 NavigationLink(destination: AddFoodView(mealTitle: mealTitle)) {
-                    Image(systemName: "plus.circle.fill")
-                        .foregroundColor(.blue)
-                    Text("Add Food")
-                        .foregroundColor(.blue)
-                        .bold()
+                    HStack {
+                        Image(systemName: "plus.circle.fill")
+                        Text("Add Food")
+                            .bold()
+                    }
+                    .foregroundColor(Calendar.current.isDateInToday(selectedDate) ? .blue : .gray)
                 }
+                .disabled(!Calendar.current.isDateInToday(selectedDate)) // Disable the button if the selected date is different from today's date
                 
             }
             .padding()
@@ -170,5 +174,5 @@ struct MealDetailsView: View {
 }
 
 #Preview {
-    MealDetailsView(mealTitle: "")
+    MealDetailsView(mealTitle: "", selectedDate: Date())
 }

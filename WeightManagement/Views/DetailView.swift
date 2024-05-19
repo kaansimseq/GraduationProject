@@ -14,12 +14,16 @@ struct DetailView: View {
     
     @ObservedObject private var viewModel = UserViewModel()
     
-    init() {
+    let selectedDate: Date
+    
+    init(selectedDate: Date) {
+        self.selectedDate = selectedDate
+
         // Get the UID when the user logs in.
         if let currentUser = Auth.auth().currentUser {
             let userUID = currentUser.uid
             viewModel.fetchDataUsers(forUID: userUID)
-            viewModel.fetchTotalNutrientsFromFirebase()
+            viewModel.fetchTotalNutrientsForSelectedDate(selectedDate: selectedDate)
         }
     }
     
@@ -45,8 +49,8 @@ struct DetailView: View {
                 .frame(width: 200, height: 200)
                 .padding()
                 
-                // Title
                 VStack {
+                    // Title
                     Text("Daily Total Nutrition Details")
                         .font(.title3)
                         .bold()
@@ -111,5 +115,5 @@ struct DetailView: View {
 }
 
 #Preview {
-    DetailView()
+    DetailView(selectedDate: Date())
 }
