@@ -3,4 +3,4 @@ The application calculates the amount of calories the user should consume daily 
 
 
 
-<img src="![Simulator Screenshot - iPhone 14 - 2024-05-20 at 02-portrait](https://github.com/kaansimseq/GraduationProject/assets/114625102/c852d8d1-0f0c-4490-9f76-4217a6e22f3e)" width="150" height="150" />
+<img src="![Simulator Screenshot - iPhone 14 - 2024-05-20 at 02-portrait](https://github.com/kaansimseq/GraduationProject/assets/114625102/c852d8d1-0f0c-4490-9f76-4217a6e22f3e)" width="250" height="250" />
