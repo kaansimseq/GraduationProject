@@ -1,7 +1,5 @@
 # GraduationProject(FitCal)
 The application calculates the amount of calories the user should consume daily with the information it receives from the user. It also recommends meals according to daily calories. In this way, it helps the user to gain or lose weight.
 
-<p align="center">
-  <img src="![image1](https://github.com/kaansimseq/GraduationProject/assets/114625102/509a06f0-ef6c-46f1-94b5-be46b067e6e2)" width="150" />
-  <img src="![image2](https://github.com/kaansimseq/GraduationProject/assets/114625102/cbb5c9bb-9530-4a9b-9a8f-5906dd1ec515)" width="150" />
-</p>
+
+![Simulator Screenshot - iPhone 14 - 2024-05-20 at 02-portrait](https://github.com/kaansimseq/GraduationProject/assets/114625102/c852d8d1-0f0c-4490-9f76-4217a6e22f3e)
